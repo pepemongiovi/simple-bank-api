@@ -9,9 +9,9 @@ A simple bank api made with NodeJS using Typescript.
 ## Steps to run:
   ### Inicialize the container
   - Navigate to project root directory in terminal
-  - Run "docker-compose up"
+  - Run "docker-compose up -d"
 
-  ### [ONLY ON FIRST TIME] Create the datebases and run the migrations
+  ### [ONLY ON FIRST RUN] Create the datebases and run the migrations
   - Create the database "yarn create-db"
   - Run "yarn run-migrations"
 
@@ -34,6 +34,7 @@ A simple bank api made with NodeJS using Typescript.
     - [POST] Bank account deposit: /banks/deposit
     - [POST] Bank account withdraw: /banks/withdraw
     - [POST] Bank account transfer: /banks/transfer
+    - [POST] Gets account's transactions history from a period: /banks/transactions
   ### Accounts
     - [POST] Create account: /accounts
     - [GET] Get account by id: /accounts/:id

@@ -1,18 +1,11 @@
+import "reflect-metadata"
 import AppError from '@shared/errors/AppError';
-
 import CreateBankService from '@modules/banks/services/CreateBankService';
 import CreateUserService from '@modules/users/services/CreateUserService';
-import FakeBanksRepository from '@modules/banks/repositories/fakes/FakeBanksRepository';
-import FakeUsersRepository from '@modules/users/repositories/fakes/FakeUsersRepository';
-import FakeHashProvider from '@modules/users/providers/HashProvider/fakes/FakeHashProvider';
-import FakeAccountsRepository from '@modules/accounts/repositories/fakes/FakeAccountsRepository';
 import DeleteAccountService from '@modules/accounts/services/DeleteAccountService';
 import CreateAccountService from '@modules/accounts/services/CreateAccountService';
-
-let fakeHashProvider = new FakeHashProvider();
-let fakeUsersRepository = new FakeUsersRepository;
-let fakeBanksRepository: FakeBanksRepository;
-let fakeAccountsRepository: FakeAccountsRepository;
+import { clearDb } from '@shared/helpers/helper';
+import { createConnections, getConnection } from 'typeorm';
 
 let deleteAccount: DeleteAccountService;
 let createUser: CreateUserService;
@@ -20,27 +13,22 @@ let createAccount: CreateAccountService;
 let createBank: CreateBankService;
 
 describe('DeleteAccount', () => {
-  beforeEach(() => {
-    fakeUsersRepository = new FakeUsersRepository();
-    fakeBanksRepository = new FakeBanksRepository();
-    fakeAccountsRepository = new FakeAccountsRepository();
-    fakeHashProvider = new FakeHashProvider();
+  beforeAll(async() => {
+    await createConnections()
+  })
 
-    createAccount = new CreateAccountService(
-      fakeAccountsRepository,
-      fakeBanksRepository,
-      fakeUsersRepository
-    );
-    createUser = new CreateUserService(
-      fakeUsersRepository,
-      fakeHashProvider
-    );
-    createBank = new CreateBankService(
-      fakeBanksRepository
-    );
-    deleteAccount = new DeleteAccountService(
-      fakeAccountsRepository
-    );
+  afterAll(async() => {
+    const connection = await getConnection()
+    await connection.close()
+  })
+
+  beforeEach(async () => {
+    await clearDb()
+
+    createAccount = new CreateAccountService();
+    createUser = new CreateUserService();
+    createBank = new CreateBankService();
+    deleteAccount = new DeleteAccountService();
   });
 
   it('should be able to delete a existing account.', async () => {
@@ -70,7 +58,7 @@ describe('DeleteAccount', () => {
   });
 
   it('should not be able to delete with an invalid id.', async () => {
-    const fakeAccountId = '111'
+    const fakeAccountId = '05766d27-f634-45ea-ac82-eb53ae5d67fe'
 
     await expect(
       deleteAccount.execute({

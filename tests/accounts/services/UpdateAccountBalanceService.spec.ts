@@ -1,20 +1,14 @@
+import "reflect-metadata"
 import Account from '@modules/accounts/infra/typeorm/entities/Account';
-import FakeAccountsRepository from '@modules/accounts/repositories/fakes/FakeAccountsRepository';
 import CreateAccountService from '@modules/accounts/services/CreateAccountService';
 import UpdateAccountBalanceService from '@modules/accounts/services/UpdateAccountBalanceService';
 import Bank from '@modules/banks/infra/typeorm/entities/Bank';
-import FakeBanksRepository from '@modules/banks/repositories/fakes/FakeBanksRepository';
 import CreateBankService from '@modules/banks/services/CreateBankService';
 import User from '@modules/users/infra/typeorm/entities/User';
-import FakeHashProvider from '@modules/users/providers/HashProvider/fakes/FakeHashProvider';
-import FakeUsersRepository from '@modules/users/repositories/fakes/FakeUsersRepository';
 import CreateUserService from '@modules/users/services/CreateUserService';
 import AppError from '@shared/errors/AppError';
-
-let fakeAccountsRepository: FakeAccountsRepository;
-let fakeUsersRepository: FakeUsersRepository;
-let fakeBanksRepository: FakeBanksRepository;
-let fakeHashProvider: FakeHashProvider;
+import { clearDb } from '@shared/helpers/helper';
+import { createConnections, getConnection } from 'typeorm';
 
 let updateAccountBalance: UpdateAccountBalanceService;
 let createAccount: CreateAccountService;
@@ -26,27 +20,22 @@ let user: User;
 let account: Account;
 
 describe('UpdateAccountBalance', () => {
-  beforeEach(async () => {
-    fakeAccountsRepository = new FakeAccountsRepository();
-    fakeBanksRepository = new FakeBanksRepository();
-    fakeUsersRepository = new FakeUsersRepository();
-    fakeHashProvider = new FakeHashProvider();
+  beforeAll(async() => {
+    await createConnections()
+  })
 
-    createUser = new CreateUserService(
-      fakeUsersRepository,
-      fakeHashProvider
-    );
-    createBank = new CreateBankService(
-      fakeBanksRepository
-    );
-    createAccount = new CreateAccountService(
-      fakeAccountsRepository,
-      fakeBanksRepository,
-      fakeUsersRepository
-    );
-    updateAccountBalance = new UpdateAccountBalanceService(
-      fakeAccountsRepository
-    );
+  afterAll(async() => {
+    const connection = await getConnection()
+    await connection.close()
+  })
+
+  beforeEach(async () => {
+    await clearDb()
+
+    createUser = new CreateUserService();
+    createBank = new CreateBankService();
+    createAccount = new CreateAccountService();
+    updateAccountBalance = new UpdateAccountBalanceService();
 
     bank = await createBank.execute({
       name: 'Banco do Brasil',
@@ -80,7 +69,7 @@ describe('UpdateAccountBalance', () => {
 
   it("should not be able to update the account's with an invalid account id.", async () => {
     const newBalance = 100
-    const fakeId = '111'
+    const fakeId = '05766d27-f634-45ea-ac82-eb53ae5d67fe'
 
     await expect(
       updateAccountBalance.execute({

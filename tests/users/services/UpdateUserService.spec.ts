@@ -1,26 +1,28 @@
-import FakeHashProvider from '@modules/users/providers/HashProvider/fakes/FakeHashProvider';
-import FakeUsersRepository from '@modules/users/repositories/fakes/FakeUsersRepository';
+import "reflect-metadata"
 import CreateUserService from '@modules/users/services/CreateUserService';
 import UpdateUserService from '@modules/users/services/UpdateUserService';
 import AppError from '@shared/errors/AppError';
+import { clearDb } from '@shared/helpers/helper';
+import { createConnections, getConnection } from 'typeorm';
 
-let fakeHashProvider = new FakeHashProvider;
-let fakeUsersRepository: FakeUsersRepository;
 let updateUser: UpdateUserService;
 let createUser: CreateUserService;
 
 describe('UpdateUser', () => {
-  beforeEach(() => {
-    fakeUsersRepository = new FakeUsersRepository();
-    fakeHashProvider = new FakeHashProvider();
+  beforeAll(async() => {
+    await createConnections()
+  })
 
-    createUser = new CreateUserService(
-      fakeUsersRepository,
-      fakeHashProvider
-    );
-    updateUser = new UpdateUserService(
-      fakeUsersRepository
-    );
+  afterAll(async() => {
+    const connection = await getConnection()
+    await connection.close()
+  })
+
+  beforeEach(async () => {
+    await clearDb()
+
+    createUser = new CreateUserService();
+    updateUser = new UpdateUserService();
   });
 
   it('should be able to update a existing user.', async () => {
@@ -48,7 +50,7 @@ describe('UpdateUser', () => {
 
   it('should not be able to update with an invalid id.', async () => {
     const fakeUser: any = {
-      id: '111',
+      id: '05766d27-f634-45ea-ac82-eb53ae5d67fe',
       name: 'Giuseppe Mongiovi',
       cpf: '07346274407',
       password: '123456',

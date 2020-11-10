@@ -5,22 +5,24 @@ import IUsersRepository from '../repositories/IUsersRepository';;
 import { cpf as cpfValidator } from 'cpf-cnpj-validator';
 
 import User from '../infra/typeorm/entities/User';
+import UsersRepository from '../infra/typeorm/repositories/UsersRepository';
 
 interface IRequest {
   user: User;
 }
 
+let usersRepository: UsersRepository
+
 @injectable()
 class UpdateUserService {
-  constructor(
-    @inject('UsersRepository')
-    private usersRepository: IUsersRepository
-  ) {}
+  constructor() {
+    usersRepository = new UsersRepository()
+  }
 
   async execute({ user }: IRequest): Promise<User> {
-    const originalUser = await this.usersRepository.findById(user.id);
+    const originalUser = await usersRepository.findById(user.id);
     const isCPFValid = cpfValidator.isValid(user.cpf)
-    const isCPFTaken = await this.usersRepository.findByCPF(user.cpf) && user.cpf != originalUser?.cpf
+    const isCPFTaken = await usersRepository.findByCPF(user.cpf) && user.cpf != originalUser?.cpf
 
     if(!originalUser) {
       throw new AppError('No user found with the given id.', 404);
@@ -32,7 +34,7 @@ class UpdateUserService {
       throw new AppError('User with this CPF already exists.', 403);
     }
 
-    const updatedUser = await this.usersRepository.save(user)
+    const updatedUser = await usersRepository.save(user)
 
     return updatedUser;
   }

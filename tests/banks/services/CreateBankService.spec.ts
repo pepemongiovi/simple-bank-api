@@ -1,17 +1,25 @@
-import FakeBanksRepository from '@modules/banks/repositories/fakes/FakeBanksRepository';
+import "reflect-metadata"
 import CreateBankService from '@modules/banks/services/CreateBankService';
 import AppError from '@shared/errors/AppError';
+import { clearDb } from '@shared/helpers/helper';
+import { createConnections, getConnection } from 'typeorm';
 
-let fakeBanksRepository: FakeBanksRepository;
 let createBank: CreateBankService;
 
 describe('CreateBankService', () => {
-  beforeEach(() => {
-    fakeBanksRepository = new FakeBanksRepository();
+  beforeAll(async() => {
+    await createConnections()
+  })
 
-    createBank = new CreateBankService(
-      fakeBanksRepository
-    );
+  afterAll(async() => {
+    const connection = await getConnection()
+    await connection.close()
+  })
+
+  beforeEach(async () => {
+    await clearDb()
+
+    createBank = new CreateBankService();
   });
 
   it('should be able to create a new bank.', async () => {

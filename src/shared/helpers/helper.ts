@@ -87,3 +87,24 @@ export const getAccountByIdForTests = async (request: any, appServer: any, id: s
     .set('Authorization', `Bearer ${authToken}`)
     .send()
 }
+
+export const makeWithdrawForTests = async(request: any, appServer: any, value: number, account_id: string, authToken = "") => {
+  return await request(appServer)
+    .post('/banks/withdraw')
+    .set('Authorization', `Bearer ${authToken}`)
+    .send({
+      value,
+      account_id,
+    })
+}
+
+export const makeTransferForTests = async(request: any, appServer: any, value: number, from_account_id: string, to_account_id: string, authToken = "") => {
+  return await request(appServer)
+    .post('/banks/transfer')
+    .set('Authorization', `Bearer ${authToken}`)
+    .send({
+      value,
+      to_account_id,
+      from_account_id
+    })
+}

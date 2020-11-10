@@ -5,6 +5,9 @@ import Account from '@modules/accounts/infra/typeorm/entities/Account';
 import IAccountsRepository from '@modules/accounts/repositories/IAccountsRepository';
 import ITransactionsRepository from '@modules/transactions/repositories/ITransactionsRepository';
 import Transaction, { TransactionType } from '@modules/transactions/infra/typeorm/entities/Transaction';
+import AccountsRepository from '@modules/accounts/infra/typeorm/repositories/AccountsRepository';
+import TransactionsRepository from '@modules/transactions/infra/typeorm/repositories/TransactionsRepository';
+import { getManager } from 'typeorm';
 
 interface IRequest {
   account_id: string;
@@ -16,47 +19,54 @@ interface IRequestReturn {
   transaction: Transaction
 }
 
+let accountsRepository: AccountsRepository;
+let transactionsRepository: TransactionsRepository;
+
 @injectable()
 class BankWithdrawService {
-  constructor(
-    @inject('AccountsRepository')
-    private accountsRepository: IAccountsRepository,
-    @inject('TransactionsRepository')
-    private transactionsRepository: ITransactionsRepository
-  ) {}
+  constructor() {
+    accountsRepository = new AccountsRepository();
+    transactionsRepository = new TransactionsRepository();
+  }
 
   async execute({ account_id, value }: IRequest): Promise<IRequestReturn> {
-    const account = await this.accountsRepository.findById(account_id);
+    let updatedAccount: any;
+    let transactionCost: any;
 
-    if(!account) {
-      throw new AppError('No account found with the given account_id.', 404);
-    }
-    else if(value <= 0) {
-      throw new AppError('Withdraw value must be greater than zero.');
-    }
+    await getManager().transaction(async entityManager => {
+      let account = await entityManager.findOne(Account, account_id, {
+        lock: { mode: 'pessimistic_write' }
+      })
 
-    const withdrawPercentageCost = 1
-    const withdrawCost = value * (withdrawPercentageCost/100)
-    const newAccountBalance = account.balance - value - withdrawCost
+      if(!account) {
+        throw new AppError('No account found with the given account_id.', 404);
+      }
+      else if(value <= 0) {
+        throw new AppError('Withdraw value must be greater than zero.');
+      }
 
-    if(newAccountBalance < 0) {
-      throw new AppError(
-        `Insufficient balance. The account's current balance is R$ ${account.balance.toFixed(2)}. Remember a cost of 1% of the value withdrawn is charged.`
-      );
-    }
+      const withdrawPercentageCost = 1
+      transactionCost = value * (withdrawPercentageCost/100)
+      const newAccountBalance = account.balance - value - transactionCost
 
-    const updatedAccount = await this.accountsRepository.save({
-      ...account,
-      balance: newAccountBalance
+      if(newAccountBalance < 0) {
+        throw new AppError(
+          `Insufficient balance. The account's current balance is R$ ${account.balance.toFixed(2)}. Remember a cost of 1% of the value withdrawn is charged.`
+        );
+      }
+
+      account.balance = newAccountBalance
+
+      updatedAccount = await entityManager.save(account)
     })
 
-    const transaction = await this.transactionsRepository.create({
-      from_account_id: account.id,
-      to_account_id: account.id,
+    const transaction = await transactionsRepository.create({
+      from_account_id: updatedAccount.id,
+      to_account_id: updatedAccount.id,
       type: TransactionType.WITHDRAW,
       value: value,
       bonusValue: 0,
-      transactionCost: withdrawCost
+      transactionCost
     })
 
     return {

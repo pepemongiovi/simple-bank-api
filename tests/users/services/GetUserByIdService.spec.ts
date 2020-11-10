@@ -1,27 +1,28 @@
-import FakeHashProvider from '@modules/users/providers/HashProvider/fakes/FakeHashProvider';
-import FakeUsersRepository from '@modules/users/repositories/fakes/FakeUsersRepository';
+import "reflect-metadata"
 import CreateUserService from '@modules/users/services/CreateUserService';
 import GetUserByIdService from '@modules/users/services/GetUserByIdService';
 import AppError from '@shared/errors/AppError';
+import { clearDb } from '@shared/helpers/helper';
+import { createConnections, getConnection } from 'typeorm';
 
-let fakeHashProvider = new FakeHashProvider();
-let fakeUsersRepository: FakeUsersRepository;
 let getUserById: GetUserByIdService;
 let createUser: CreateUserService;
 
-
 describe('GetByIdUser', () => {
-  beforeEach(() => {
-    fakeUsersRepository = new FakeUsersRepository();
-    fakeHashProvider = new FakeHashProvider();
+  beforeAll(async() => {
+    await createConnections()
+  })
 
-    createUser = new CreateUserService(
-      fakeUsersRepository,
-      fakeHashProvider
-    );
-    getUserById = new GetUserByIdService(
-      fakeUsersRepository
-    );
+  afterAll(async() => {
+    const connection = await getConnection()
+    await connection.close()
+  })
+
+  beforeEach(async () => {
+    await clearDb()
+
+    createUser = new CreateUserService();
+    getUserById = new GetUserByIdService();
   });
 
   it('should be able to get a existing user.', async () => {
@@ -43,7 +44,7 @@ describe('GetByIdUser', () => {
   });
 
   it('should not be able to find a user with an invalid id.', async () => {
-    const fakeUserId = '111'
+    const fakeUserId = '05766d27-f634-45ea-ac82-eb53ae5d67fe'
 
     await expect(
       getUserById.execute({

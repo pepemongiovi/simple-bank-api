@@ -1,23 +1,28 @@
-import FakeBanksRepository from '@modules/banks/repositories/fakes/FakeBanksRepository';
+import "reflect-metadata"
 import CreateBankService from '@modules/banks/services/CreateBankService';
 import DeleteBankService from '@modules/banks/services/DeleteBankService';
 import AppError from '@shared/errors/AppError';
-
-let fakeBanksRepository: FakeBanksRepository;
+import { clearDb } from '@shared/helpers/helper';
+import { createConnections, getConnection } from 'typeorm';
 
 let deleteBank: DeleteBankService;
 let createBank: CreateBankService;
 
 describe('DeleteBankService', () => {
-  beforeEach(() => {
-    fakeBanksRepository = new FakeBanksRepository();
+  beforeAll(async() => {
+    await createConnections()
+  })
 
-    createBank = new CreateBankService(
-      fakeBanksRepository
-    );
-    deleteBank = new DeleteBankService(
-      fakeBanksRepository
-    );
+  afterAll(async() => {
+    const connection = await getConnection()
+    await connection.close()
+  })
+
+  beforeEach(async () => {
+    await clearDb()
+
+    createBank = new CreateBankService();
+    deleteBank = new DeleteBankService();
   });
 
   it('should be able to delete a existing bank.', async () => {
@@ -36,7 +41,7 @@ describe('DeleteBankService', () => {
   });
 
   it('should not be able to delete with an invalid id.', async () => {
-    const fakeBankId = '111'
+    const fakeBankId = '05766d27-f634-45ea-ac82-eb53ae5d67fe'
 
     await expect(
       deleteBank.execute({

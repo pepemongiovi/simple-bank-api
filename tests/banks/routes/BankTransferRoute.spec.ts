@@ -2,7 +2,7 @@ import Account from "@modules/accounts/infra/typeorm/entities/Account";
 import Bank from "@modules/banks/infra/typeorm/entities/Bank";
 import { TransactionType } from "@modules/transactions/infra/typeorm/entities/Transaction";
 import User from "@modules/users/infra/typeorm/entities/User";
-import { clearDb, createAccountForTests, createBankForTests, createUserAndAuthenticateForTests, isTransactionEquals, makeDepositForTests } from "@shared/helpers/helper";
+import { clearDb, createAccountForTests, createBankForTests, createUserAndAuthenticateForTests, isTransactionEquals, makeDepositForTests, makeTransferForTests } from "@shared/helpers/helper";
 
 const request = require('supertest')
 const appServer = require('@shared/infra/http/server')
@@ -156,14 +156,3 @@ describe('BankTransferRoute', () => {
     )
   });
 })
-
-export const makeTransferForTests = async(request: any, appServer: any, value: number, from_account_id: string, to_account_id: string, authToken = "") => {
-  return await request(appServer)
-    .post('/banks/transfer')
-    .set('Authorization', `Bearer ${authToken}`)
-    .send({
-      value,
-      to_account_id,
-      from_account_id
-    })
-}

@@ -8,7 +8,6 @@ const EXPECTED_VERSION_METADATA = Symbol();
 export class OptimisticLockingSubscriber implements EntitySubscriberInterface {
 
     beforeUpdate(event: UpdateEvent<any>) {
-
         // We only deal with entities which have a version number.
         // To know if an entity has a version number, we check if versionColumn
         // is defined in the metadatas of that entity.

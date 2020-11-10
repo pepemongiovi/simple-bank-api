@@ -1,21 +1,25 @@
-import FakeHashProvider from '@modules/users/providers/HashProvider/fakes/FakeHashProvider';
-import FakeUsersRepository from '@modules/users/repositories/fakes/FakeUsersRepository';
+import "reflect-metadata"
 import CreateUserService from '@modules/users/services/CreateUserService';
 import AppError from '@shared/errors/AppError';
+import { clearDb } from '@shared/helpers/helper';
+import { createConnections, getConnection } from 'typeorm';
 
-let fakeUsersRepository: FakeUsersRepository;
-let fakeHashProvider: FakeHashProvider;
 let createUser: CreateUserService;
 
 describe('CreateUser', () => {
-  beforeEach(() => {
-    fakeUsersRepository = new FakeUsersRepository();
-    fakeHashProvider = new FakeHashProvider();
+  beforeAll(async() => {
+    await createConnections()
+  })
 
-    createUser = new CreateUserService(
-      fakeUsersRepository,
-      fakeHashProvider
-    );
+  afterAll(async() => {
+    const connection = await getConnection()
+    await connection.close()
+  })
+
+  beforeEach(async () => {
+    await clearDb()
+
+    createUser = new CreateUserService();
   });
 
   it('should be able to create a new user.', async () => {

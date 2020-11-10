@@ -1,24 +1,15 @@
+import "reflect-metadata"
 import Account from '@modules/accounts/infra/typeorm/entities/Account';
-import FakeAccountsRepository from '@modules/accounts/repositories/fakes/FakeAccountsRepository';
 import CreateAccountService from '@modules/accounts/services/CreateAccountService';
 import GetAccountByIdService from '@modules/accounts/services/GetAccountByIdService';
-import FakeBanksRepository from '@modules/banks/repositories/fakes/FakeBanksRepository';
 import BankDepositService from '@modules/banks/services/BankDepositService';
 import BankTransferService from '@modules/banks/services/BankTransferService';
 import CreateBankService from '@modules/banks/services/CreateBankService';
-import Transaction, { TransactionType } from '@modules/transactions/infra/typeorm/entities/Transaction';
-import FakeTransactionsRepository from '@modules/transactions/repositories/fakes/FakeTransactionsRepository';
-import FakeHashProvider from '@modules/users/providers/HashProvider/fakes/FakeHashProvider';
-import FakeUsersRepository from '@modules/users/repositories/fakes/FakeUsersRepository';
+import { TransactionType } from '@modules/transactions/infra/typeorm/entities/Transaction';
 import CreateUserService from '@modules/users/services/CreateUserService';
 import AppError from '@shared/errors/AppError';
-import { isTransactionEquals } from '@shared/helpers/helper';
-
-let fakeTransactionsRepository: FakeTransactionsRepository;
-let fakeAccountsRepository: FakeAccountsRepository;
-let fakeUsersRepository: FakeUsersRepository;
-let fakeBanksRepository: FakeBanksRepository;
-let fakeHashProvider: FakeHashProvider;
+import { clearDb, isTransactionEquals } from '@shared/helpers/helper';
+import { createConnections, getConnection } from 'typeorm';
 
 let getAccountById: GetAccountByIdService;
 let bankDeposit: BankDepositService;
@@ -33,37 +24,25 @@ let otherAccount: Account;
 describe('BankTransferService', () => {
   const valueDeposited = 500
 
+  beforeAll(async() => {
+    await createConnections()
+  })
+
+  afterAll(async() => {
+    const connection = await getConnection()
+    await connection.close()
+  })
+
   //Creates two accounts and deposits 500 in one of them
   beforeEach(async() => {
-    fakeTransactionsRepository = new FakeTransactionsRepository();
-    fakeAccountsRepository = new FakeAccountsRepository();
-    fakeBanksRepository = new FakeBanksRepository();
-    fakeUsersRepository = new FakeUsersRepository();
-    fakeHashProvider = new FakeHashProvider();
+    await clearDb()
 
-    createUser = new CreateUserService(
-      fakeUsersRepository,
-      fakeHashProvider
-    );
-    createBank = new CreateBankService(
-      fakeBanksRepository
-    );
-    createAccount = new CreateAccountService(
-      fakeAccountsRepository,
-      fakeBanksRepository,
-      fakeUsersRepository
-    );
-    getAccountById = new GetAccountByIdService(
-      fakeAccountsRepository
-    )
-    bankDeposit = new BankDepositService(
-      fakeAccountsRepository,
-      fakeTransactionsRepository
-    )
-    bankTransfer = new BankTransferService(
-      fakeAccountsRepository,
-      fakeTransactionsRepository
-    )
+    createUser = new CreateUserService();
+    createBank = new CreateBankService();
+    createAccount = new CreateAccountService();
+    getAccountById = new GetAccountByIdService()
+    bankDeposit = new BankDepositService()
+    bankTransfer = new BankTransferService()
 
     const bank = await createBank.execute({
       name: 'Banco do Brasil',
@@ -149,7 +128,7 @@ describe('BankTransferService', () => {
 
     await expect(bankTransfer.execute({
         from_account_id: accountWithDeposit.id,
-        to_account_id: '111',
+        to_account_id: '05766d27-f634-45ea-ac82-eb53ae5d67fe',
         value: valueToTransfer
       })
     ).rejects.toMatchObject(
@@ -161,7 +140,7 @@ describe('BankTransferService', () => {
     const valueToTransfer = 100.5
 
     await expect(bankTransfer.execute({
-        from_account_id: '111',
+        from_account_id: '05766d27-f634-45ea-ac82-eb53ae5d67fe',
         to_account_id: accountWithDeposit.id,
         value: valueToTransfer
       })

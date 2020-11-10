@@ -1,23 +1,29 @@
-import FakeBanksRepository from '@modules/banks/repositories/fakes/FakeBanksRepository';
+import "reflect-metadata"
 import CreateBankService from '@modules/banks/services/CreateBankService';
 import GetBankByIdService from '@modules/banks/services/GetBankByIdService';
 import AppError from '@shared/errors/AppError';
+import { clearDb } from '@shared/helpers/helper';
+import { createConnections, getConnection } from 'typeorm';
 
-let fakeBanksRepository: FakeBanksRepository;
 let getBankById: GetBankByIdService;
 let createBank: CreateBankService;
 
 
 describe('GetByIdBankService', () => {
-  beforeEach(() => {
-    fakeBanksRepository = new FakeBanksRepository();
+  beforeAll(async() => {
+    await createConnections()
+  })
 
-    createBank = new CreateBankService(
-      fakeBanksRepository
-    );
-    getBankById = new GetBankByIdService(
-      fakeBanksRepository
-    );
+  afterAll(async() => {
+    const connection = await getConnection()
+    await connection.close()
+  })
+
+  beforeEach(async () => {
+    await clearDb()
+
+    createBank = new CreateBankService();
+    getBankById = new GetBankByIdService();
   });
 
   it('should be able to get a existing bank.', async () => {
@@ -38,7 +44,7 @@ describe('GetByIdBankService', () => {
   });
 
   it('should not be able to find a bank with an invalid id.', async () => {
-    const fakeBankId = '111'
+    const fakeBankId = '05766d27-f634-45ea-ac82-eb53ae5d67fe'
 
     await expect(
       getBankById.execute({

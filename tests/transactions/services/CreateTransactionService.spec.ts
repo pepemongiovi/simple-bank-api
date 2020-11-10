@@ -1,21 +1,13 @@
+import "reflect-metadata"
 import Account from '@modules/accounts/infra/typeorm/entities/Account';
-import FakeAccountsRepository from '@modules/accounts/repositories/fakes/FakeAccountsRepository';
 import CreateAccountService from '@modules/accounts/services/CreateAccountService';
-import FakeBanksRepository from '@modules/banks/repositories/fakes/FakeBanksRepository';
 import CreateBankService from '@modules/banks/services/CreateBankService';
 import { TransactionType } from '@modules/transactions/infra/typeorm/entities/Transaction';
-import FakeTransactionsRepository from '@modules/transactions/repositories/fakes/FakeTransactionsRepository';
 import CreateTransactionService from '@modules/transactions/services/CreateTransactionService';
-import FakeHashProvider from '@modules/users/providers/HashProvider/fakes/FakeHashProvider';
-import FakeUsersRepository from '@modules/users/repositories/fakes/FakeUsersRepository';
 import CreateUserService from '@modules/users/services/CreateUserService';
 import AppError from '@shared/errors/AppError';
-
-let fakeTransactionsRepository: FakeTransactionsRepository;
-let fakeAccountsRepository: FakeAccountsRepository;
-let fakeUsersRepository: FakeUsersRepository;
-let fakeBanksRepository: FakeBanksRepository;
-let fakeHashProvider: FakeHashProvider;
+import { clearDb } from '@shared/helpers/helper';
+import { createConnections, getConnection } from 'typeorm';
 
 let createTransaction: CreateTransactionService;
 let createAccount: CreateAccountService;
@@ -25,29 +17,22 @@ let createUser: CreateUserService;
 let account: Account
 
 describe('CreateTransaction', () => {
-  beforeEach(async() => {
-    fakeTransactionsRepository = new FakeTransactionsRepository();
-    fakeAccountsRepository = new FakeAccountsRepository();
-    fakeBanksRepository = new FakeBanksRepository();
-    fakeUsersRepository = new FakeUsersRepository();
-    fakeHashProvider = new FakeHashProvider();
+  beforeAll(async() => {
+    await createConnections()
+  })
 
-    createUser = new CreateUserService(
-      fakeUsersRepository,
-      fakeHashProvider
-    );
-    createBank = new CreateBankService(
-      fakeBanksRepository
-    );
-    createAccount = new CreateAccountService(
-      fakeAccountsRepository,
-      fakeBanksRepository,
-      fakeUsersRepository
-    );
-    createTransaction = new CreateTransactionService(
-      fakeTransactionsRepository,
-      fakeAccountsRepository
-    );
+  afterAll(async() => {
+    const connection = await getConnection()
+    await connection.close()
+  })
+
+  beforeEach(async () => {
+    await clearDb()
+
+    createUser = new CreateUserService();
+    createBank = new CreateBankService();
+    createAccount = new CreateAccountService();
+    createTransaction = new CreateTransactionService();
 
     const bank = await createBank.execute({
       name: 'Banco do Brasil',
@@ -145,7 +130,7 @@ describe('CreateTransaction', () => {
     const transactionCost = 0
 
     await expect(createTransaction.execute({
-      from_account_id: '111',
+      from_account_id: '05766d27-f634-45ea-ac82-eb53ae5d67fe',
       to_account_id: account.id,
       value,
       type,
@@ -157,7 +142,7 @@ describe('CreateTransaction', () => {
 
     await expect(createTransaction.execute({
       from_account_id: account.id,
-      to_account_id: '111',
+      to_account_id: '05766d27-f634-45ea-ac82-eb53ae5d67fe',
       value,
       type,
       bonusValue,

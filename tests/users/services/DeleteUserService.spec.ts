@@ -1,28 +1,29 @@
-import FakeHashProvider from '@modules/users/providers/HashProvider/fakes/FakeHashProvider';
-import FakeUsersRepository from '@modules/users/repositories/fakes/FakeUsersRepository';
+import "reflect-metadata"
 import CreateUserService from '@modules/users/services/CreateUserService';
 import DeleteUserService from '@modules/users/services/DeleteUserService';
 import AppError from '@shared/errors/AppError';
-
-let fakeUsersRepository: FakeUsersRepository;
-let fakeHashProvider: FakeHashProvider;
+import { clearDb } from '@shared/helpers/helper';
+import { createConnections, getConnection } from 'typeorm';
 
 let deleteUser: DeleteUserService;
 let createUser: CreateUserService;
 
 
 describe('DeleteUser', () => {
-  beforeEach(() => {
-    fakeUsersRepository = new FakeUsersRepository();
-    fakeHashProvider = new FakeHashProvider();
+  beforeAll(async() => {
+    await createConnections()
+  })
 
-    createUser = new CreateUserService(
-      fakeUsersRepository,
-      fakeHashProvider
-    );
-    deleteUser = new DeleteUserService(
-      fakeUsersRepository
-    );
+  afterAll(async() => {
+    const connection = await getConnection()
+    await connection.close()
+  })
+
+  beforeEach(async () => {
+    await clearDb()
+
+    createUser = new CreateUserService();
+    deleteUser = new DeleteUserService();
   });
 
   it('should be able to delete a existing user.', async () => {
@@ -42,7 +43,7 @@ describe('DeleteUser', () => {
   });
 
   it('should not be able to delete with an invalid id.', async () => {
-    const fakeUserId = '111'
+    const fakeUserId = '05766d27-f634-45ea-ac82-eb53ae5d67fe'
 
     await expect(
       deleteUser.execute({

@@ -14,13 +14,11 @@ class AccountsRepository implements IAccountsRepository {
   }
 
   public async findById(id: string): Promise<Account | undefined> {
-    const options = {
+    const account: any = await this.ormRepository.findOne(id, {
       relations: [ "transactions" ]
-    }
+    });
 
-    const account = await this.ormRepository.findOne(id, options);
-
-    return account;
+    return account
   }
 
   public async findByUserId(user_id: string): Promise<Account | undefined> {

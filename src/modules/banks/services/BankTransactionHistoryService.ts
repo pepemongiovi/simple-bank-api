@@ -5,7 +5,11 @@ import IAccountsRepository from '@modules/accounts/repositories/IAccountsReposit
 import Transaction from '@modules/transactions/infra/typeorm/entities/Transaction';
 import { isAfter, isBefore, isEqual } from 'date-fns';
 import ITransactionsRepository from '@modules/transactions/repositories/ITransactionsRepository';
-import transactionsRouter from '@modules/transactions/infra/http/routes/transactions.routes';
+import GetAccountByIdService from '@modules/accounts/services/GetAccountByIdService';
+import FindTransactionsByAccountIdService from '@modules/transactions/services/FindTransactionsByAccountIdService';
+import Account from '@modules/accounts/infra/typeorm/entities/Account';
+import AccountsRepository from '@modules/accounts/infra/typeorm/repositories/AccountsRepository';
+import TransactionsRepository from '@modules/transactions/infra/typeorm/repositories/TransactionsRepository';
 
 interface IRequest {
   account_id: string;
@@ -13,17 +17,18 @@ interface IRequest {
   to_date: Date;
 }
 
+let transactionsRepository: TransactionsRepository
+let accountsRepository: AccountsRepository
+
 @injectable()
 class BankTransactionHistoryService {
-  constructor(
-    @inject('AccountsRepository')
-    private accountsRepository: IAccountsRepository,
-    @inject('TransactionsRepository')
-    private transactionsRepository: ITransactionsRepository
-  ) {}
+  constructor() {
+    transactionsRepository = new TransactionsRepository()
+    accountsRepository = new AccountsRepository()
+  }
 
   async execute({ account_id, from_date, to_date }: IRequest): Promise<Transaction[]> {
-    const accountExists = await this.accountsRepository.findById(account_id);
+    const accountExists = await accountsRepository.findById(account_id);
 
     const isDateIntervalValid = isBefore(from_date, to_date)
     const isInitialDateValid = isBefore(from_date, new Date())
@@ -38,7 +43,9 @@ class BankTransactionHistoryService {
       throw new AppError('Initial date must not be greater than current date.');
     }
 
-    const accountTransactions = await this.transactionsRepository.findByAccountId(account_id)
+    const accountTransactions = await transactionsRepository.findByAccountId(
+      account_id
+    )
 
     const transactionWithinInterval = accountTransactions?.filter((t) =>
       !t.created_at || (

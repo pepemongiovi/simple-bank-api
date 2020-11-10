@@ -3,10 +3,10 @@ import authConfig from '@config/auth';
 import { injectable, inject } from 'tsyringe';
 
 import AppError from '@shared/errors/AppError';
-import IUsersRepository from '../repositories/IUsersRepository';
-import IHashProvider from '../providers/HashProvider/models/IHashProvider';
 
 import User from '../infra/typeorm/entities/User';
+import UsersRepository from '../infra/typeorm/repositories/UsersRepository';
+import BCryptHashProvider from '../providers/HashProvider/implementations/BCryptHashProvider';
 
 interface IRequest {
   cpf: string;
@@ -17,23 +17,25 @@ interface IResponse {
   user: User;
   token: string;
 }
+
+let usersRepository: UsersRepository
+let hashProvider: BCryptHashProvider
+
 @injectable()
 class AuthenticateUserService {
-  constructor(
-    @inject('UsersRepository')
-    private usersRepository: IUsersRepository,
-    @inject('HashProvider')
-    private hashProvider: IHashProvider,
-  ) {}
+  constructor() {
+    hashProvider = new BCryptHashProvider()
+    usersRepository = new UsersRepository()
+  }
 
   public async execute({ cpf, password }: IRequest): Promise<IResponse> {
-    const user = await this.usersRepository.findByCPF(cpf);
+    const user = await usersRepository.findByCPF(cpf);
 
     if (!user) {
       throw new AppError('No user was found with the given CPF.', 404);
     }
 
-    const passwordMatched = await this.hashProvider.compareHash(
+    const passwordMatched = await hashProvider.compareHash(
       password,
       user.password,
     );

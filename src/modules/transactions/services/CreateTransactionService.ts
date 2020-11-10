@@ -5,6 +5,10 @@ import ITransactionsRepository from '../repositories/ITransactionsRepository';
 
 import Transaction, { TransactionType } from '../infra/typeorm/entities/Transaction';
 import IAccountsRepository from '@modules/accounts/repositories/IAccountsRepository';
+import { getRepository } from 'typeorm';
+import GetAccountByIdService from '@modules/accounts/services/GetAccountByIdService';
+import TransactionsRepository from '../infra/typeorm/repositories/TransactionsRepository';
+import AccountsRepository from '@modules/accounts/infra/typeorm/repositories/AccountsRepository';
 
 interface IRequest {
   from_account_id: string;
@@ -15,18 +19,19 @@ interface IRequest {
   transactionCost: number;
 }
 
+let transactionsRepository: TransactionsRepository;
+let accountsRepository: AccountsRepository;
+
 @injectable()
 class CreateTransactionService {
-  constructor(
-    @inject('TransactionsRepository')
-    private transactionsRepository: ITransactionsRepository,
-    @inject('AccountsRepository')
-    private accountsRepository: IAccountsRepository
-  ) {}
+  constructor() {
+    accountsRepository = new AccountsRepository()
+    transactionsRepository = new TransactionsRepository()
+  }
 
   async execute({ from_account_id, to_account_id, type, value, bonusValue, transactionCost }: IRequest): Promise<Transaction> {
-    const isFromAccountIdValid = await this.accountsRepository.findById(from_account_id);
-    const isToAccountIdValid = await this.accountsRepository.findById(to_account_id);
+    const isFromAccountIdValid = await accountsRepository.findById(from_account_id);
+    const isToAccountIdValid = await accountsRepository.findById(to_account_id);
 
     if(!isFromAccountIdValid) {
       throw new AppError('No account found for given from_account_id.', 404);
@@ -44,7 +49,7 @@ class CreateTransactionService {
       throw new AppError('Transaction cost must be greater than zero.');
     }
 
-    const transaction = await this.transactionsRepository.create({
+    const transaction = await transactionsRepository.create({
       from_account_id,
       to_account_id,
       type,

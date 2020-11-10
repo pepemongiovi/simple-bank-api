@@ -1,19 +1,12 @@
-import FakeAccountsRepository from '@modules/accounts/repositories/fakes/FakeAccountsRepository';
+import "reflect-metadata"
 import CreateAccountService from '@modules/accounts/services/CreateAccountService';
 import Bank from '@modules/banks/infra/typeorm/entities/Bank';
-import FakeBanksRepository from '@modules/banks/repositories/fakes/FakeBanksRepository';
 import CreateBankService from '@modules/banks/services/CreateBankService';
 import User from '@modules/users/infra/typeorm/entities/User';
-import FakeHashProvider from '@modules/users/providers/HashProvider/fakes/FakeHashProvider';
-import FakeUsersRepository from '@modules/users/repositories/fakes/FakeUsersRepository';
 import CreateUserService from '@modules/users/services/CreateUserService';
 import AppError from '@shared/errors/AppError';
-
-
-let fakeAccountsRepository: FakeAccountsRepository;
-let fakeUsersRepository: FakeUsersRepository;
-let fakeBanksRepository: FakeBanksRepository;
-let fakeHashProvider: FakeHashProvider;
+import { clearDb } from '@shared/helpers/helper';
+import { createConnections, getConnection } from 'typeorm';
 
 let createAccount: CreateAccountService;
 let createBank: CreateBankService;
@@ -23,24 +16,22 @@ let bank: Bank;
 let user: User;
 
 describe('CreateAccount', () => {
-  beforeEach(async () => {
-    fakeAccountsRepository = new FakeAccountsRepository();
-    fakeBanksRepository = new FakeBanksRepository();
-    fakeUsersRepository = new FakeUsersRepository();
-    fakeHashProvider = new FakeHashProvider();
 
-    createUser = new CreateUserService(
-      fakeUsersRepository,
-      fakeHashProvider
-    );
-    createBank = new CreateBankService(
-      fakeBanksRepository
-    );
-    createAccount = new CreateAccountService(
-      fakeAccountsRepository,
-      fakeBanksRepository,
-      fakeUsersRepository
-    );
+  beforeAll(async() => {
+    await createConnections()
+  })
+
+  afterAll(async() => {
+    const connection = await getConnection()
+    await connection.close()
+  })
+
+  beforeEach(async () => {
+    await clearDb()
+
+    createUser = new CreateUserService();
+    createBank = new CreateBankService();
+    createAccount = new CreateAccountService();
 
     bank = await createBank.execute({
       name: 'Banco do Brasil',
@@ -82,7 +73,7 @@ describe('CreateAccount', () => {
   });
 
   it('should not be able to create a new account with an invalid bank id.', async () => {
-    const fakeId = '111'
+    const fakeId = '05766d27-f634-45ea-ac82-eb53ae5d67fe'
 
     await expect(
       createAccount.execute({
@@ -95,7 +86,7 @@ describe('CreateAccount', () => {
   });
 
   it('should not be able to create a new account with an invalid user id.', async () => {
-    const fakeId = '111'
+    const fakeId = '05766d27-f634-45ea-ac82-eb53ae5d67fe'
 
     await expect(
       createAccount.execute({

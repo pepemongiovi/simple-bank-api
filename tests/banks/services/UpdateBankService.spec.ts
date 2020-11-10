@@ -1,22 +1,28 @@
-import FakeBanksRepository from '@modules/banks/repositories/fakes/FakeBanksRepository';
+import "reflect-metadata"
 import CreateBankService from '@modules/banks/services/CreateBankService';
 import UpdateBankService from '@modules/banks/services/UpdateBankService';
 import AppError from '@shared/errors/AppError';
+import { clearDb } from '@shared/helpers/helper';
+import { createConnections, getConnection } from 'typeorm';
 
-let fakeBanksRepository: FakeBanksRepository;
 let updateBank: UpdateBankService;
 let createBank: CreateBankService;
 
 describe('UpdateBankService', () => {
-  beforeEach(() => {
-    fakeBanksRepository = new FakeBanksRepository();
+  beforeAll(async() => {
+    await createConnections()
+  })
 
-    createBank = new CreateBankService(
-      fakeBanksRepository
-    );
-    updateBank = new UpdateBankService(
-      fakeBanksRepository
-    );
+  afterAll(async() => {
+    const connection = await getConnection()
+    await connection.close()
+  })
+
+  beforeEach(async () => {
+    await clearDb()
+
+    createBank = new CreateBankService();
+    updateBank = new UpdateBankService();
   });
 
   it('should be able to update a existing bank.', async () => {
@@ -44,7 +50,7 @@ describe('UpdateBankService', () => {
 
   it('should not be able to update with an invalid id.', async () => {
     const fakeBank: any = {
-      id: '111',
+      id: '05766d27-f634-45ea-ac82-eb53ae5d67fe',
       name: 'Giuseppe Mongiovi',
       cpf: '07346274407',
       password: '123456',

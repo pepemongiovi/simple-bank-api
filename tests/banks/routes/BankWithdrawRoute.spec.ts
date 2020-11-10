@@ -1,7 +1,7 @@
 import Bank from "@modules/banks/infra/typeorm/entities/Bank";
 import { TransactionType } from "@modules/transactions/infra/typeorm/entities/Transaction";
 import User from "@modules/users/infra/typeorm/entities/User";
-import { clearDb, createAccountForTests, createBankForTests, createUserAndAuthenticateForTests, isTransactionEquals, makeDepositForTests } from "@shared/helpers/helper";
+import { clearDb, createAccountForTests, createBankForTests, createUserAndAuthenticateForTests, isTransactionEquals, makeDepositForTests, makeWithdrawForTests } from "@shared/helpers/helper";
 
 const request = require('supertest')
 const appServer = require('@shared/infra/http/server')
@@ -106,13 +106,3 @@ describe('BankWithdrawRoute', () => {
     expect(negativeWithdraw.body.message).toEqual('Withdraw value must be greater than zero.')
   });
 })
-
-export const makeWithdrawForTests = async(request: any, appServer: any, value: number, account_id: string, authToken = "") => {
-  return await request(appServer)
-    .post('/banks/withdraw')
-    .set('Authorization', `Bearer ${authToken}`)
-    .send({
-      value,
-      account_id,
-    })
-}

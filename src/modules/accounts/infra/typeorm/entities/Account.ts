@@ -11,6 +11,7 @@ import {
   JoinColumn,
   OneToOne,
   OneToMany,
+  VersionColumn,
 } from 'typeorm';
 
 @Entity('accounts')
@@ -37,6 +38,9 @@ class Account {
 
   @Column('float', { default: 0 })
   balance: number;
+
+  @VersionColumn() // A versioned entity!
+  version: number;
 
   @CreateDateColumn()
   created_at: Date;

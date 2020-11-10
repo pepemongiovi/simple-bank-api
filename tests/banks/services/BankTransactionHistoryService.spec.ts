@@ -1,26 +1,15 @@
+import "reflect-metadata"
 import Account from '@modules/accounts/infra/typeorm/entities/Account';
-import FakeAccountsRepository from '@modules/accounts/repositories/fakes/FakeAccountsRepository';
 import CreateAccountService from '@modules/accounts/services/CreateAccountService';
-import FakeBanksRepository from '@modules/banks/repositories/fakes/FakeBanksRepository';
 import BankDepositService from '@modules/banks/services/BankDepositService';
 import BankTransactionHistoryService from '@modules/banks/services/BankTransactionHistoryService';
 import CreateBankService from '@modules/banks/services/CreateBankService';
-import transactionsRouter from '@modules/transactions/infra/http/routes/transactions.routes';
 import Transaction, { TransactionType } from '@modules/transactions/infra/typeorm/entities/Transaction';
-import TransactionsRepository from '@modules/transactions/infra/typeorm/repositories/TransactionsRepository';
-import FakeTransactionsRepository from '@modules/transactions/repositories/fakes/FakeTransactionsRepository';
-import FakeHashProvider from '@modules/users/providers/HashProvider/fakes/FakeHashProvider';
-import FakeUsersRepository from '@modules/users/repositories/fakes/FakeUsersRepository';
 import CreateUserService from '@modules/users/services/CreateUserService';
 import AppError from '@shared/errors/AppError';
 import { clearDb, isTransactionEquals } from '@shared/helpers/helper';
 import { addMonths, endOfDay, startOfDay } from 'date-fns';
-
-let fakeTransactionsRepository: FakeTransactionsRepository;
-let fakeAccountsRepository: FakeAccountsRepository;
-let fakeUsersRepository: FakeUsersRepository;
-let fakeBanksRepository: FakeBanksRepository;
-let fakeHashProvider: FakeHashProvider;
+import { createConnections, getConnection } from 'typeorm';
 
 let bankTransactionHistory: BankTransactionHistoryService;
 let createAccount: CreateAccountService;
@@ -37,34 +26,24 @@ interface IDepositResult {
 }
 
 describe('BankTransactionHistoryService', () => {
+  beforeAll(async() => {
+    await createConnections()
+  })
+
+  afterAll(async() => {
+    const connection = await getConnection()
+    await connection.close()
+  })
+
   //Creates bank, user, account and makes 3 deposits
   beforeEach(async() => {
-    fakeTransactionsRepository = new FakeTransactionsRepository();
-    fakeAccountsRepository = new FakeAccountsRepository();
-    fakeBanksRepository = new FakeBanksRepository();
-    fakeUsersRepository = new FakeUsersRepository();
-    fakeHashProvider = new FakeHashProvider();
+    await clearDb()
 
-    createUser = new CreateUserService(
-      fakeUsersRepository,
-      fakeHashProvider
-    );
-    createBank = new CreateBankService(
-      fakeBanksRepository
-    );
-    createAccount = new CreateAccountService(
-      fakeAccountsRepository,
-      fakeBanksRepository,
-      fakeUsersRepository
-    );
-    bankDeposit = new BankDepositService(
-      fakeAccountsRepository,
-      fakeTransactionsRepository
-    )
-    bankTransactionHistory = new BankTransactionHistoryService(
-      fakeAccountsRepository,
-      fakeTransactionsRepository
-    )
+    createUser = new CreateUserService();
+    createBank = new CreateBankService();
+    createAccount = new CreateAccountService();
+    bankDeposit = new BankDepositService()
+    bankTransactionHistory = new BankTransactionHistoryService()
 
     const bank = await createBank.execute({
       name: 'Banco do Brasil',

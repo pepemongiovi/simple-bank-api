@@ -6,6 +6,8 @@ import IHashProvider from '../providers/HashProvider/models/IHashProvider';
 import { cpf as cpfValidator } from 'cpf-cnpj-validator';
 
 import User from '../infra/typeorm/entities/User';
+import UsersRepository from '../infra/typeorm/repositories/UsersRepository';
+import BCryptHashProvider from '../providers/HashProvider/implementations/BCryptHashProvider';
 
 interface IRequest {
   name: string;
@@ -13,18 +15,19 @@ interface IRequest {
   password: string;
 }
 
+let usersRepository: UsersRepository
+let hashProvider: BCryptHashProvider
+
 @injectable()
 class CreateUserService {
-  constructor(
-    @inject('UsersRepository')
-    private usersRepository: IUsersRepository,
-    @inject('HashProvider')
-    private hashProvider: IHashProvider
-  ) {}
+  constructor() {
+    hashProvider = new BCryptHashProvider()
+    usersRepository = new UsersRepository()
+  }
 
   async execute({ name, cpf, password }: IRequest): Promise<User> {
     const isCPFValid = cpfValidator.isValid(cpf)
-    const isCPFTaken = await this.usersRepository.findByCPF(cpf);
+    const isCPFTaken = await usersRepository.findByCPF(cpf);
 
     if(!isCPFValid) {
       throw new AppError('Invalid CPF.');
@@ -33,9 +36,9 @@ class CreateUserService {
       throw new AppError('User with this CPF already exists.', 403);
     }
 
-    const hashedPassword = await this.hashProvider.generateHash(password);
+    const hashedPassword = await hashProvider.generateHash(password);
 
-    const user = await this.usersRepository.create({
+    const user = await usersRepository.create({
       name,
       cpf,
       password: hashedPassword,

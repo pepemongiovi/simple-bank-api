@@ -1,17 +1,11 @@
-import FakeAccountsRepository from '@modules/accounts/repositories/fakes/FakeAccountsRepository';
+import "reflect-metadata"
 import CreateAccountService from '@modules/accounts/services/CreateAccountService';
 import GetAccountByIdService from '@modules/accounts/services/GetAccountByIdService';
-import FakeBanksRepository from '@modules/banks/repositories/fakes/FakeBanksRepository';
 import CreateBankService from '@modules/banks/services/CreateBankService';
-import FakeHashProvider from '@modules/users/providers/HashProvider/fakes/FakeHashProvider';
-import FakeUsersRepository from '@modules/users/repositories/fakes/FakeUsersRepository';
 import CreateUserService from '@modules/users/services/CreateUserService';
 import AppError from '@shared/errors/AppError';
-
-let fakeAccountsRepository: FakeAccountsRepository;
-let fakeUsersRepository: FakeUsersRepository;
-let fakeBanksRepository: FakeBanksRepository;
-let fakeHashProvider: FakeHashProvider;
+import { clearDb } from '@shared/helpers/helper';
+import { createConnections, getConnection } from 'typeorm';
 
 let getAccountById: GetAccountByIdService
 let createAccount: CreateAccountService;
@@ -19,27 +13,22 @@ let createBank: CreateBankService;
 let createUser: CreateUserService;
 
 describe('CreateAccount', () => {
-  beforeEach(() => {
-    fakeAccountsRepository = new FakeAccountsRepository();
-    fakeBanksRepository = new FakeBanksRepository();
-    fakeUsersRepository = new FakeUsersRepository();
-    fakeHashProvider = new FakeHashProvider();
+  beforeAll(async() => {
+    await createConnections()
+  })
 
-    createUser = new CreateUserService(
-      fakeUsersRepository,
-      fakeHashProvider
-    );
-    createBank = new CreateBankService(
-      fakeBanksRepository
-    );
-    getAccountById = new GetAccountByIdService(
-      fakeAccountsRepository
-    )
-    createAccount = new CreateAccountService(
-      fakeAccountsRepository,
-      fakeBanksRepository,
-      fakeUsersRepository
-    );
+  afterAll(async() => {
+    const connection = await getConnection()
+    await connection.close()
+  })
+
+  beforeEach(async () => {
+    await clearDb()
+
+    createUser = new CreateUserService();
+    createBank = new CreateBankService();
+    getAccountById = new GetAccountByIdService()
+    createAccount = new CreateAccountService();
   });
 
   it('should be able to get a account.', async () => {
@@ -69,7 +58,7 @@ describe('CreateAccount', () => {
   it('should not be able to get a account with a not existing id.', async () => {
     await expect(
       getAccountById.execute({
-        id: '111'
+        id: '05766d27-f634-45ea-ac82-eb53ae5d67fe'
       })
     ).rejects.toMatchObject(
       new AppError('No account found for given id.', 404)

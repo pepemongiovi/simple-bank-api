@@ -1,36 +1,44 @@
-import FakeHashProvider from '@modules/users/providers/HashProvider/fakes/FakeHashProvider';
-import FakeUsersRepository from '@modules/users/repositories/fakes/FakeUsersRepository';
+import "reflect-metadata"
 import AuthenticateUserService from '@modules/users/services/AuthenticateUserService';
+import CreateUserService from '@modules/users/services/CreateUserService';
 import AppError from '@shared/errors/AppError';
+import { clearDb } from '@shared/helpers/helper';
+import { createConnections, getConnection } from 'typeorm';
 
-let fakeUsersRepository: FakeUsersRepository;
-let fakeHashProvider: FakeHashProvider;
 let authenticateUser: AuthenticateUserService;
+let createUserService: CreateUserService;
 
 describe('AuthenticateUser', () => {
-  beforeEach(() => {
-    fakeUsersRepository = new FakeUsersRepository();
-    fakeHashProvider = new FakeHashProvider();
-    authenticateUser = new AuthenticateUserService(
-      fakeUsersRepository,
-      fakeHashProvider,
-    );
+  beforeAll(async() => {
+    await createConnections()
+  })
+
+  afterAll(async() => {
+    const connection = await getConnection()
+    await connection.close()
+  })
+
+  beforeEach(async () => {
+    await clearDb()
+
+    createUserService = new CreateUserService()
+    authenticateUser = new AuthenticateUserService();
   });
 
   it('should be able to authenticate', async () => {
-    const user = await fakeUsersRepository.create({
+    const user = await createUserService.execute({
       name: 'Giuseppe Mongiovi',
       cpf: '07346274407',
       password: '123456',
     });
 
     const response = await authenticateUser.execute({
-      cpf: '07346274407',
+      cpf: user.cpf,
       password: '123456',
     });
 
     expect(response).toHaveProperty('token');
-    expect(response.user).toEqual(user);
+    expect(response.user.cpf).toEqual(user.cpf);
   });
 
   it('should not be able to authenticate with non existing user.', async () => {
@@ -45,7 +53,7 @@ describe('AuthenticateUser', () => {
   });
 
   it('should not be able to authenticate with wrong password.', async () => {
-    await fakeUsersRepository.create({
+    await createUserService.execute({
       name: 'Giuseppe Mongiovi',
       cpf: '07346274407',
       password: '123456',

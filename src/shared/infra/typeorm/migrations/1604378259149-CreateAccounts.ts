@@ -1,5 +1,5 @@
-import User from "@modules/users/infra/typeorm/entities/User";
-import {MigrationInterface, QueryRunner, Table} from "typeorm";
+import Account from "@modules/accounts/infra/typeorm/entities/Account";
+import {getRepository, MigrationInterface, QueryRunner, Table} from "typeorm";
 
 export class CreateAccounts1604378259149 implements MigrationInterface {
 
@@ -29,6 +29,11 @@ export class CreateAccounts1604378259149 implements MigrationInterface {
               name: 'balance',
               type: 'float',
               default: 0
+            },
+            {
+              name: 'version',
+              type: 'int',
+              default: 1
             },
             {
               name: 'created_at',

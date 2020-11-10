@@ -1,3 +1,5 @@
+const { OptimisticLockingSubscriber } = require("@shared/infra/typeorm/subscribers/OptimisticLockingSubscriber");
+
 module.exports = {
   "name": process.env.DEFAULT_CONNECTION,
   "type": "postgres",
