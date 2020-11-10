@@ -1,10 +1,7 @@
 import { Repository, getRepository } from 'typeorm';
-
 import IAccountsRepository from '@modules/accounts/repositories/IAccountsRepository';
 import ICreateAccountDTO from '@modules/accounts/dtos/ICreateAccountDTO';
-
 import Account from '../entities/Account';
-import Transaction from '@modules/transactions/infra/typeorm/entities/Transaction';
 
 class AccountsRepository implements IAccountsRepository {
   private ormRepository: Repository<Account>;
@@ -15,17 +12,17 @@ class AccountsRepository implements IAccountsRepository {
 
   public async findById(id: string): Promise<Account | undefined> {
     const account: any = await this.ormRepository.findOne(id, {
-      relations: [ "transactions" ]
+      relations: ['transactions'],
     });
 
-    return account
+    return account;
   }
 
   public async findByUserId(user_id: string): Promise<Account | undefined> {
     const options = {
       where: { user_id },
-      relations: [ "transactions" ]
-    }
+      relations: ['transactions'],
+    };
 
     const account = await this.ormRepository.findOne(options);
 
@@ -45,8 +42,8 @@ class AccountsRepository implements IAccountsRepository {
   }
 
   public async delete(id: string): Promise<string> {
-    await this.ormRepository.delete(id)
-    return "Account deleted!";
+    await this.ormRepository.delete(id);
+    return 'Account deleted!';
   }
 }
 

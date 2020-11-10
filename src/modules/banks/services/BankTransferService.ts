@@ -2,8 +2,9 @@ import { injectable } from 'tsyringe';
 
 import AppError from '@shared/errors/AppError';
 import Account from '@modules/accounts/infra/typeorm/entities/Account';
-import Transaction, { TransactionType } from '@modules/transactions/infra/typeorm/entities/Transaction';
-import AccountsRepository from '@modules/accounts/infra/typeorm/repositories/AccountsRepository';
+import Transaction, {
+  TransactionType,
+} from '@modules/transactions/infra/typeorm/entities/Transaction';
 import TransactionsRepository from '@modules/transactions/infra/typeorm/repositories/TransactionsRepository';
 import { getManager } from 'typeorm';
 
@@ -14,78 +15,91 @@ interface IRequest {
 }
 
 interface IRequestReturn {
-  updatedAccount: Account,
-  transaction: Transaction
+  updatedAccount: Account;
+  transaction: Transaction;
 }
 
-let accountsRepository: AccountsRepository;
 let transactionsRepository: TransactionsRepository;
 
 @injectable()
 class BankTransferService {
   constructor() {
-    accountsRepository = new AccountsRepository();
     transactionsRepository = new TransactionsRepository();
   }
 
-  async execute({ from_account_id, to_account_id, value }: IRequest): Promise<IRequestReturn> {
+  async execute({
+    from_account_id,
+    to_account_id,
+    value,
+  }: IRequest): Promise<IRequestReturn> {
     let updatedFromAccount: any;
 
-    await getManager().transaction(async entityManager => {
-      const toAccountExists = await entityManager.findOne(Account, to_account_id)
-      const fromAccount = await entityManager.findOne(Account, from_account_id, {
-        lock: { mode: 'pessimistic_write' }
-      })
+    await getManager().transaction(async (entityManager) => {
+      const toAccountExists = await entityManager.findOne(
+        Account,
+        to_account_id,
+      );
+      const fromAccount = await entityManager.findOne(
+        Account,
+        from_account_id,
+        {
+          lock: { mode: 'pessimistic_write' },
+        },
+      );
 
-      if(from_account_id === to_account_id) {
-        throw new AppError("Cannnot make a transfer to you own account.")
+      if (from_account_id === to_account_id) {
+        throw new AppError('Cannnot make a transfer to you own account.');
       }
-      if(!fromAccount) {
+      if (!fromAccount) {
         throw new AppError('Cannot transfer from a nonexisting account.', 404);
-      }
-      else if(!toAccountExists) {
+      } else if (!toAccountExists) {
         throw new AppError('Cannot transfer to a nonexisting account.', 404);
       }
 
-      const hasEnoughBalance = value <= fromAccount.balance
+      const hasEnoughBalance = value <= fromAccount.balance;
 
-      if(value <= 0) {
+      if (value <= 0) {
         throw new AppError('Transfer value must be greater than zero.');
-      }
-      else if(!hasEnoughBalance) {
+      } else if (!hasEnoughBalance) {
         throw new AppError(
-          `Insufficient balance. The account's current balance is R$ ${fromAccount.balance.toFixed(2)}.`
+          `Insufficient balance. The account's current balance is R$ ${fromAccount.balance.toFixed(
+            2,
+          )}.`,
         );
       }
 
-      fromAccount.balance = fromAccount.balance - value
+      fromAccount.balance -= value;
 
-      updatedFromAccount = await entityManager.save(fromAccount)
-    })
+      updatedFromAccount = await entityManager.save(fromAccount);
+    });
 
-    await getManager().transaction(async entityManager => {
-      const toAccount: any = await entityManager.findOne(Account, to_account_id, {
-        lock: { mode: 'pessimistic_write' }
-      })
+    await getManager().transaction(async (entityManager) => {
+      const toAccount: any = await entityManager.findOne(
+        Account,
+        to_account_id,
+        {
+          lock: { mode: 'pessimistic_write' },
+        },
+      );
 
-      toAccount.balance = toAccount.balance + value
+      toAccount.balance += value;
 
-      await entityManager.save(toAccount)
-    })
+      await entityManager.save(toAccount);
+    });
 
     const transaction = await transactionsRepository.create({
-      from_account_id: from_account_id,
-      to_account_id: to_account_id,
+      from_account_id,
+      to_account_id,
       type: TransactionType.TRANSFER,
-      value: value,
+      value,
       bonusValue: 0,
-      transactionCost: 0
-    })
+      transactionCost: 0,
+    });
 
     return {
       updatedAccount: updatedFromAccount,
-      transaction
-    }
+      transaction,
+    };
   }
 }
 

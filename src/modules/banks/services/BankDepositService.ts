@@ -1,13 +1,12 @@
-import { injectable, inject } from 'tsyringe';
+import { injectable } from 'tsyringe';
 
 import AppError from '@shared/errors/AppError';
 import Account from '@modules/accounts/infra/typeorm/entities/Account';
-import IAccountsRepository from '@modules/accounts/repositories/IAccountsRepository';
-import ITransactionsRepository from '@modules/transactions/repositories/ITransactionsRepository';
-import Transaction, { TransactionType } from '@modules/transactions/infra/typeorm/entities/Transaction';
+import Transaction, {
+  TransactionType,
+} from '@modules/transactions/infra/typeorm/entities/Transaction';
 import { getManager } from 'typeorm';
 import TransactionsRepository from '@modules/transactions/infra/typeorm/repositories/TransactionsRepository';
-import transactionsRouter from '@modules/transactions/infra/http/routes/transactions.routes';
 
 interface IRequest {
   account_id: string;
@@ -15,57 +14,56 @@ interface IRequest {
 }
 
 interface IRequestReturn {
-  updatedAccount: Account,
-  transaction: Transaction
+  updatedAccount: Account;
+  transaction: Transaction;
 }
 
-let transactionsRepository: TransactionsRepository
+let transactionsRepository: TransactionsRepository;
 
 @injectable()
 class BankDepositService {
   constructor() {
-    transactionsRepository = new TransactionsRepository()
+    transactionsRepository = new TransactionsRepository();
   }
 
   async execute({ account_id, value }: IRequest): Promise<IRequestReturn> {
     let updatedAccount: any;
     let bonusValue: any;
 
-    await getManager().transaction(async entityManager => {
-      let account = await entityManager.findOne(Account, account_id, {
-        lock: { mode: 'pessimistic_write' }
-      })
+    await getManager().transaction(async (entityManager) => {
+      const account = await entityManager.findOne(Account, account_id, {
+        lock: { mode: 'pessimistic_write' },
+      });
 
-      const isValueValid = value > 0
+      const isValueValid = value > 0;
 
-      if(!account) {
+      if (!account) {
         throw new AppError('No account found with the given account_id.', 404);
-      }
-      else if (!isValueValid) {
+      } else if (!isValueValid) {
         throw new AppError('Deposit value must be greater than zero.');
       }
 
-      const depositPercentageBonus = 0.5
-      bonusValue = value * (depositPercentageBonus/100)
-      const newAccountBalance = account.balance + value + bonusValue
+      const depositPercentageBonus = 0.5;
+      bonusValue = value * (depositPercentageBonus / 100);
+      const newAccountBalance = account.balance + value + bonusValue;
 
-      account.balance = newAccountBalance
+      account.balance = newAccountBalance;
 
-      updatedAccount = await entityManager.save(account)
-    })
+      updatedAccount = await entityManager.save(account);
+    });
 
     const transaction = await transactionsRepository.create({
       from_account_id: updatedAccount.id,
       to_account_id: updatedAccount.id,
       type: TransactionType.DEPOSIT,
-      value: value,
-      bonusValue: bonusValue,
-      transactionCost: 0
-    })
+      value,
+      bonusValue,
+      transactionCost: 0,
+    });
 
     return {
       updatedAccount,
-      transaction
+      transaction,
     };
   }
 }

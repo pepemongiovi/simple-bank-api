@@ -4,16 +4,14 @@ import {
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
-  UpdateDateColumn,
   JoinColumn,
-  OneToOne,
   ManyToOne,
 } from 'typeorm';
 
 export enum TransactionType {
   DEPOSIT = 'deposit',
   TRANSFER = 'transfer',
-  WITHDRAW = 'withdraw'
+  WITHDRAW = 'withdraw',
 }
 
 @Entity('transactions')

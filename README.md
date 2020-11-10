@@ -7,16 +7,12 @@ A simple bank api made with NodeJS using Typescript.
   - Install [Docker Compose](https://docs.docker.com/compose/install/)
 
 ## Steps to run:
-  ### Inicialize the container
   - Navigate to project root directory in terminal
-  - Run "docker-compose up -d"
+  - Run `docker-compose up -d`
+  - Access API through port 3333
 
-  ### [ONLY ON FIRST RUN] Create the datebases and run the migrations
-  - Create the database "yarn create-db"
-  - Run "yarn run-migrations"
-
-  ### Access
-  - Access api through port 3333
+## How to run tests
+  - Run `docker exec -ti bank-api sh -c "yarn test"`
 
 ## Routes
   ### Users

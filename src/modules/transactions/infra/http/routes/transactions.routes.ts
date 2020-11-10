@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import { celebrate, Segments, Joi } from 'celebrate';
 
-import TransactionRegistrationController from '../controllers/TransactionRegistrationController';
 import ensureAuthenticated from '@modules/users/infra/http/middlewares/ensureAuthenticated';
+import TransactionRegistrationController from '../controllers/TransactionRegistrationController';
 
 const transactionsRouter = Router();
 const transactionRegistrationController = new TransactionRegistrationController();
 
-transactionsRouter.use(ensureAuthenticated)
+transactionsRouter.use(ensureAuthenticated);
 
 transactionsRouter.post(
   '/',
@@ -21,7 +21,7 @@ transactionsRouter.post(
       transactionCost: Joi.number().required(),
     },
   }),
-  transactionRegistrationController.create
+  transactionRegistrationController.create,
 );
 
 export default transactionsRouter;

@@ -1,5 +1,5 @@
 export default interface ICreateAccountDTO {
-  user_id: string,
-  bank_id: string,
-  balance: number,
+  user_id: string;
+  bank_id: string;
+  balance: number;
 }

@@ -6,20 +6,19 @@ import cors from 'cors';
 import { errors } from 'celebrate';
 import 'express-async-errors';
 import AppError from '@shared/errors/AppError';
+import { isRuningTests } from '@shared/helpers/helper';
 import routes from './routes';
 import rateLimiter from './middlewares/rateLimiter';
 
 import '@shared/infra/typeorm';
 import '@shared/container';
 
-import { isRuningTests } from '@shared/helpers/helper';
-
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-if(!isRuningTests()) {
+if (!isRuningTests()) {
   app.use(rateLimiter);
 }
 
@@ -42,4 +41,4 @@ app.use((err: Error, req: Request, res: Response, _: NextFunction) => {
   });
 });
 
-module.exports = app
+module.exports = app;

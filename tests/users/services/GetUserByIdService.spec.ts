@@ -1,4 +1,6 @@
-import "reflect-metadata"
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable import/no-unresolved */
+import 'reflect-metadata';
 import CreateUserService from '@modules/users/services/CreateUserService';
 import GetUserByIdService from '@modules/users/services/GetUserByIdService';
 import AppError from '@shared/errors/AppError';
@@ -9,17 +11,17 @@ let getUserById: GetUserByIdService;
 let createUser: CreateUserService;
 
 describe('GetByIdUser', () => {
-  beforeAll(async() => {
-    await createConnections()
-  })
+  beforeAll(async () => {
+    await createConnections();
+  });
 
-  afterAll(async() => {
-    const connection = await getConnection()
-    await connection.close()
-  })
+  afterAll(async () => {
+    const connection = await getConnection();
+    await connection.close();
+  });
 
   beforeEach(async () => {
-    await clearDb()
+    await clearDb();
 
     createUser = new CreateUserService();
     getUserById = new GetUserByIdService();
@@ -35,23 +37,21 @@ describe('GetByIdUser', () => {
     expect(user).toHaveProperty('id');
 
     const fetchedUser = await getUserById.execute({
-      id: user.id
+      id: user.id,
     });
 
-    expect(fetchedUser).toMatchObject(
-      user
-    )
+    expect(fetchedUser).toMatchObject(user);
   });
 
   it('should not be able to find a user with an invalid id.', async () => {
-    const fakeUserId = '05766d27-f634-45ea-ac82-eb53ae5d67fe'
+    const fakeUserId = '05766d27-f634-45ea-ac82-eb53ae5d67fe';
 
     await expect(
       getUserById.execute({
-        id: fakeUserId
-      })
+        id: fakeUserId,
+      }),
     ).rejects.toMatchObject(
-      new AppError('No user found with the given id.', 404)
-    )
+      new AppError('No user found with the given id.', 404),
+    );
   });
 });

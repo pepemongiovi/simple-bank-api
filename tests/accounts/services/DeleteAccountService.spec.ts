@@ -1,4 +1,6 @@
-import "reflect-metadata"
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable import/no-unresolved */
+import 'reflect-metadata';
 import AppError from '@shared/errors/AppError';
 import CreateBankService from '@modules/banks/services/CreateBankService';
 import CreateUserService from '@modules/users/services/CreateUserService';
@@ -13,17 +15,17 @@ let createAccount: CreateAccountService;
 let createBank: CreateBankService;
 
 describe('DeleteAccount', () => {
-  beforeAll(async() => {
-    await createConnections()
-  })
+  beforeAll(async () => {
+    await createConnections();
+  });
 
-  afterAll(async() => {
-    const connection = await getConnection()
-    await connection.close()
-  })
+  afterAll(async () => {
+    const connection = await getConnection();
+    await connection.close();
+  });
 
   beforeEach(async () => {
-    await clearDb()
+    await clearDb();
 
     createAccount = new CreateAccountService();
     createUser = new CreateUserService();
@@ -34,38 +36,38 @@ describe('DeleteAccount', () => {
   it('should be able to delete a existing account.', async () => {
     const bank = await createBank.execute({
       name: 'Banco do Brasil',
-      cnpj: '00.000.000/0001-91'
+      cnpj: '00.000.000/0001-91',
     });
 
     const user = await createUser.execute({
       name: 'Giuseppe Mongiovi',
       cpf: '07346274407',
-      password: '123456'
+      password: '123456',
     });
 
     const account = await createAccount.execute({
       user_id: user.id,
-      bank_id: bank.id
+      bank_id: bank.id,
     });
 
     expect(account).toHaveProperty('id');
 
     const result = await deleteAccount.execute({
-      id: account.id
+      id: account.id,
     });
 
-    expect(result).toBe("Account deleted!");
+    expect(result).toBe('Account deleted!');
   });
 
   it('should not be able to delete with an invalid id.', async () => {
-    const fakeAccountId = '05766d27-f634-45ea-ac82-eb53ae5d67fe'
+    const fakeAccountId = '05766d27-f634-45ea-ac82-eb53ae5d67fe';
 
     await expect(
       deleteAccount.execute({
-        id: fakeAccountId
-      })
+        id: fakeAccountId,
+      }),
     ).rejects.toMatchObject(
-      new AppError('No account found with the given id.', 404)
-    )
+      new AppError('No account found with the given id.', 404),
+    );
   });
 });

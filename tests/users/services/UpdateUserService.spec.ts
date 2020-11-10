@@ -1,4 +1,6 @@
-import "reflect-metadata"
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable import/no-unresolved */
+import 'reflect-metadata';
 import CreateUserService from '@modules/users/services/CreateUserService';
 import UpdateUserService from '@modules/users/services/UpdateUserService';
 import AppError from '@shared/errors/AppError';
@@ -9,17 +11,17 @@ let updateUser: UpdateUserService;
 let createUser: CreateUserService;
 
 describe('UpdateUser', () => {
-  beforeAll(async() => {
-    await createConnections()
-  })
+  beforeAll(async () => {
+    await createConnections();
+  });
 
-  afterAll(async() => {
-    const connection = await getConnection()
-    await connection.close()
-  })
+  afterAll(async () => {
+    const connection = await getConnection();
+    await connection.close();
+  });
 
   beforeEach(async () => {
-    await clearDb()
+    await clearDb();
 
     createUser = new CreateUserService();
     updateUser = new UpdateUserService();
@@ -36,16 +38,14 @@ describe('UpdateUser', () => {
 
     const modifiedUser = {
       ...user,
-      name: 'Giuseppe Guerra Mongiovi'
-    }
+      name: 'Giuseppe Guerra Mongiovi',
+    };
 
     const updatedUser = await updateUser.execute({
-      user: modifiedUser
+      user: modifiedUser,
     });
 
-    expect(updatedUser).toMatchObject(
-      modifiedUser
-    );
+    expect(updatedUser).toMatchObject(modifiedUser);
   });
 
   it('should not be able to update with an invalid id.', async () => {
@@ -54,14 +54,14 @@ describe('UpdateUser', () => {
       name: 'Giuseppe Mongiovi',
       cpf: '07346274407',
       password: '123456',
-    }
+    };
 
     await expect(
       updateUser.execute({
-        user: fakeUser
-      })
+        user: fakeUser,
+      }),
     ).rejects.toMatchObject(
-      new AppError('No user found with the given id.', 404)
-    )
+      new AppError('No user found with the given id.', 404),
+    );
   });
 });

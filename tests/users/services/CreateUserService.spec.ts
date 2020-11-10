@@ -1,4 +1,6 @@
-import "reflect-metadata"
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable import/no-unresolved */
+import 'reflect-metadata';
 import CreateUserService from '@modules/users/services/CreateUserService';
 import AppError from '@shared/errors/AppError';
 import { clearDb } from '@shared/helpers/helper';
@@ -7,17 +9,17 @@ import { createConnections, getConnection } from 'typeorm';
 let createUser: CreateUserService;
 
 describe('CreateUser', () => {
-  beforeAll(async() => {
-    await createConnections()
-  })
+  beforeAll(async () => {
+    await createConnections();
+  });
 
-  afterAll(async() => {
-    const connection = await getConnection()
-    await connection.close()
-  })
+  afterAll(async () => {
+    const connection = await getConnection();
+    await connection.close();
+  });
 
   beforeEach(async () => {
-    await clearDb()
+    await clearDb();
 
     createUser = new CreateUserService();
   });
@@ -46,9 +48,9 @@ describe('CreateUser', () => {
         name: 'Giuseppe Mongiovi',
         cpf: '07346274407',
         password: '123456',
-      })
+      }),
     ).rejects.toMatchObject(
-      new AppError('User with this CPF already exists.', 403)
+      new AppError('User with this CPF already exists.', 403),
     );
   });
 
@@ -58,9 +60,7 @@ describe('CreateUser', () => {
         name: 'Giuseppe Mongiovi',
         cpf: '07346274400',
         password: '123456',
-      })
-    ).rejects.toMatchObject(
-      new AppError('Invalid CPF.')
-    );
+      }),
+    ).rejects.toMatchObject(new AppError('Invalid CPF.'));
   });
 });

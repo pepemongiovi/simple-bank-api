@@ -18,19 +18,19 @@ const bankRegistrationController = new BankRegistrationController();
 const bankDepositController = new BankDepositController();
 const bankTransferController = new BankTransferController();
 const bankWithdrawController = new BankWithdrawController();
-const bankFindByIdController = new BankFindByIdController()
-const bankUpdateController = new BankUpdateController()
-const bankDeletionController = new BankDeletionController()
-const bankTransactionHistoryController = new BankTransactionHistoryController()
+const bankFindByIdController = new BankFindByIdController();
+const bankUpdateController = new BankUpdateController();
+const bankDeletionController = new BankDeletionController();
+const bankTransactionHistoryController = new BankTransactionHistoryController();
 
-banksRouter.use(ensureAuthenticated)
+banksRouter.use(ensureAuthenticated);
 
 banksRouter.post(
   '/',
   celebrate({
     [Segments.BODY]: {
       name: Joi.string().required(),
-      cnpj: Joi.string().required()
+      cnpj: Joi.string().required(),
     },
   }),
   bankRegistrationController.create,
@@ -41,7 +41,7 @@ banksRouter.post(
   celebrate({
     [Segments.BODY]: {
       account_id: Joi.string().uuid().required(),
-      value: Joi.number().required()
+      value: Joi.number().required(),
     },
   }),
   bankDepositController.deposit,
@@ -52,7 +52,7 @@ banksRouter.post(
   celebrate({
     [Segments.BODY]: {
       account_id: Joi.string().uuid().required(),
-      value: Joi.number().required()
+      value: Joi.number().required(),
     },
   }),
   bankWithdrawController.withdraw,
@@ -64,7 +64,7 @@ banksRouter.post(
     [Segments.BODY]: {
       from_account_id: Joi.string().uuid().required(),
       to_account_id: Joi.string().uuid().required(),
-      value: Joi.number().required()
+      value: Joi.number().required(),
     },
   }),
   bankTransferController.transfer,
@@ -74,8 +74,8 @@ banksRouter.get(
   '/:id',
   celebrate({
     [Segments.PARAMS]: {
-      id: Joi.string().uuid().required()
-    }
+      id: Joi.string().uuid().required(),
+    },
   }),
   bankFindByIdController.getById,
 );
@@ -84,7 +84,7 @@ banksRouter.put(
   '/',
   celebrate({
     [Segments.BODY]: {
-      bank: Joi.required()
+      bank: Joi.required(),
     },
   }),
   bankUpdateController.update,
@@ -94,8 +94,8 @@ banksRouter.delete(
   '/:id',
   celebrate({
     [Segments.PARAMS]: {
-      id: Joi.string().uuid().required()
-    }
+      id: Joi.string().uuid().required(),
+    },
   }),
   bankDeletionController.delete,
 );
@@ -106,7 +106,7 @@ banksRouter.post(
     [Segments.BODY]: {
       account_id: Joi.string().uuid().required(),
       from_date: Joi.date().required(),
-      to_date: Joi.date().required()
+      to_date: Joi.date().required(),
     },
   }),
   bankTransactionHistoryController.getHistory,

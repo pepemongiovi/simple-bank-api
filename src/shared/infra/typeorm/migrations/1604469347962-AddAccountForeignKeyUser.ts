@@ -1,7 +1,7 @@
-import {MigrationInterface, QueryRunner, TableColumn, TableForeignKey} from "typeorm";
+import { MigrationInterface, QueryRunner, TableForeignKey } from 'typeorm';
 
-export class AddAccountForeignKeyUser1604469347962 implements MigrationInterface {
-
+export default class AddAccountForeignKeyUser1604469347962
+  implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createForeignKey(
       'users',
@@ -12,8 +12,8 @@ export class AddAccountForeignKeyUser1604469347962 implements MigrationInterface
         referencedTableName: 'accounts',
         onDelete: 'SET NULL',
         onUpdate: 'CASCADE',
-      })
-    )
+      }),
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

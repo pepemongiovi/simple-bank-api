@@ -1,9 +1,7 @@
 import { sign } from 'jsonwebtoken';
 import authConfig from '@config/auth';
-import { injectable, inject } from 'tsyringe';
-
+import { injectable } from 'tsyringe';
 import AppError from '@shared/errors/AppError';
-
 import User from '../infra/typeorm/entities/User';
 import UsersRepository from '../infra/typeorm/repositories/UsersRepository';
 import BCryptHashProvider from '../providers/HashProvider/implementations/BCryptHashProvider';
@@ -18,14 +16,14 @@ interface IResponse {
   token: string;
 }
 
-let usersRepository: UsersRepository
-let hashProvider: BCryptHashProvider
+let usersRepository: UsersRepository;
+let hashProvider: BCryptHashProvider;
 
 @injectable()
 class AuthenticateUserService {
   constructor() {
-    hashProvider = new BCryptHashProvider()
-    usersRepository = new UsersRepository()
+    hashProvider = new BCryptHashProvider();
+    usersRepository = new UsersRepository();
   }
 
   public async execute({ cpf, password }: IRequest): Promise<IResponse> {

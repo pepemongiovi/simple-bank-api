@@ -1,4 +1,4 @@
-import { Repository, getRepository, Not } from 'typeorm';
+import { Repository, getRepository } from 'typeorm';
 
 import ITransactionsRepository from '@modules/transactions/repositories/ITransactionsRepository';
 import ICreateTransactionDTO from '@modules/transactions/dtos/ICreateTransactionDTO';
@@ -17,12 +17,18 @@ class TransactionsRepository implements ITransactionsRepository {
     return transaction;
   }
 
-  public async findByAccountId(from_account_id: string): Promise<Transaction[]> {
-    const transaction = await this.ormRepository.find({ where: { from_account_id } });
+  public async findByAccountId(
+    from_account_id: string,
+  ): Promise<Transaction[]> {
+    const transaction = await this.ormRepository.find({
+      where: { from_account_id },
+    });
     return transaction;
   }
 
-  public async create(transactionData: ICreateTransactionDTO): Promise<Transaction> {
+  public async create(
+    transactionData: ICreateTransactionDTO,
+  ): Promise<Transaction> {
     const transaction = this.ormRepository.create(transactionData);
 
     await this.ormRepository.save(transaction);
@@ -35,8 +41,8 @@ class TransactionsRepository implements ITransactionsRepository {
   }
 
   public async delete(id: string): Promise<string> {
-    await this.ormRepository.delete(id)
-    return "Transaction deleted!";
+    await this.ormRepository.delete(id);
+    return 'Transaction deleted!';
   }
 }
 

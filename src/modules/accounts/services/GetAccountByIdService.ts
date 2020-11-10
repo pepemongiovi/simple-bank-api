@@ -1,8 +1,5 @@
-import { injectable, inject } from 'tsyringe';
-
+import { injectable } from 'tsyringe';
 import AppError from '@shared/errors/AppError';
-import IAccountsRepository from '../repositories/IAccountsRepository';
-
 import Account from '../infra/typeorm/entities/Account';
 import AccountsRepository from '../infra/typeorm/repositories/AccountsRepository';
 
@@ -15,13 +12,13 @@ let accountsRepository: AccountsRepository;
 @injectable()
 class GetAccountByIdService {
   constructor() {
-    accountsRepository = new AccountsRepository()
+    accountsRepository = new AccountsRepository();
   }
 
-  async execute({ id  }: IRequest): Promise<Account> {
+  async execute({ id }: IRequest): Promise<Account> {
     const account = await accountsRepository.findById(id);
 
-    if(!account) {
+    if (!account) {
       throw new AppError('No account found for given id.', 404);
     }
 

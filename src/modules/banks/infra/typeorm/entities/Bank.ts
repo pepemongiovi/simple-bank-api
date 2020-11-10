@@ -13,7 +13,7 @@ class Bank {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToMany(() => Account, account => account.bank)
+  @OneToMany(() => Account, (account) => account.bank)
   accounts: Account[];
 
   @Column()

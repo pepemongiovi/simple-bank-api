@@ -1,4 +1,4 @@
-import { Repository, getRepository, Not } from 'typeorm';
+import { Repository, getRepository } from 'typeorm';
 
 import IBanksRepository from '@modules/banks/repositories/IBanksRepository';
 import ICreateBankDTO from '@modules/banks/dtos/ICreateBankDTO';
@@ -35,8 +35,8 @@ class BanksRepository implements IBanksRepository {
   }
 
   public async delete(id: string): Promise<string> {
-    await this.ormRepository.delete(id)
-    return "Bank deleted!";
+    await this.ormRepository.delete(id);
+    return 'Bank deleted!';
   }
 }
 

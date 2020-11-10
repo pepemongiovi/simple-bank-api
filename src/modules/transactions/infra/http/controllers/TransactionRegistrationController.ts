@@ -7,7 +7,14 @@ import CreateTransactionService from '@modules/transactions/services/CreateTrans
 
 export default class TransactionRegistrationController {
   public async create(request: Request, response: Response): Promise<Response> {
-    const { from_account_id, to_account_id, type, value, bonusValue, transactionCost } = request.body;
+    const {
+      from_account_id,
+      to_account_id,
+      type,
+      value,
+      bonusValue,
+      transactionCost,
+    } = request.body;
 
     const createTransaction = container.resolve(CreateTransactionService);
 
@@ -17,7 +24,7 @@ export default class TransactionRegistrationController {
       type,
       value,
       bonusValue,
-      transactionCost
+      transactionCost,
     });
 
     return response.json(classToClass(transaction));

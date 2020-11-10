@@ -13,7 +13,7 @@ const userFindByIdController = new UserFindByIdController();
 const userUpdateController = new UserUpdateController();
 const userDeletionController = new UserDeletionController();
 
-//Public routes
+// Public routes
 usersRouter.post(
   '/',
   celebrate({
@@ -26,15 +26,15 @@ usersRouter.post(
   userRegistrationController.create,
 );
 
-//Private routes
-usersRouter.use(ensureAuthenticated)
+// Private routes
+usersRouter.use(ensureAuthenticated);
 
 usersRouter.get(
   '/:id',
   celebrate({
     [Segments.PARAMS]: {
-      id: Joi.string().uuid().required()
-    }
+      id: Joi.string().uuid().required(),
+    },
   }),
   userFindByIdController.getById,
 );
@@ -43,7 +43,7 @@ usersRouter.put(
   '/',
   celebrate({
     [Segments.BODY]: {
-      user: Joi.required()
+      user: Joi.required(),
     },
   }),
   userUpdateController.update,
@@ -53,8 +53,8 @@ usersRouter.delete(
   '/:id',
   celebrate({
     [Segments.PARAMS]: {
-      id: Joi.string().uuid().required()
-    }
+      id: Joi.string().uuid().required(),
+    },
   }),
   userDeletionController.delete,
 );

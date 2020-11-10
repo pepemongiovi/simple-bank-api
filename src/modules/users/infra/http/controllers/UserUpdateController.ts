@@ -12,7 +12,7 @@ export default class UserUpdateController {
     const updateUser = container.resolve(UpdateUserService);
 
     const updatedUser = await updateUser.execute({
-      user
+      user,
     });
 
     return response.json(classToClass(updatedUser));

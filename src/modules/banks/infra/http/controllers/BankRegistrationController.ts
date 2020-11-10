@@ -1,4 +1,3 @@
-// index, show, create, update,
 import { Request, Response } from 'express';
 import { container } from 'tsyringe';
 import { classToClass } from 'class-transformer';
@@ -13,7 +12,7 @@ export default class BankRegistrationController {
 
     const bank = await createBank.execute({
       name,
-      cnpj
+      cnpj,
     });
 
     return response.json(classToClass(bank));

@@ -12,7 +12,7 @@ export default class UserDeletionController {
     const deleteUser = container.resolve(DeleteUserService);
 
     const user = await deleteUser.execute({
-      id
+      id,
     });
 
     return response.json(classToClass(user));

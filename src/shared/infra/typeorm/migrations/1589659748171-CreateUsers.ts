@@ -1,9 +1,8 @@
-import { isRuningTests } from '@shared/helpers/helper';
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
 export default class CreateUsers1589659748171 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"')
+    await queryRunner.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
     await queryRunner.createTable(
       new Table({
         name: 'users',
@@ -43,7 +42,7 @@ export default class CreateUsers1589659748171 implements MigrationInterface {
             type: 'timestamp',
             default: 'now()',
           },
-        ]
+        ],
       }),
     );
   }

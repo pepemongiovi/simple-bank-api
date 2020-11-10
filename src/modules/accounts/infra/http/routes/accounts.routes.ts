@@ -14,50 +14,50 @@ const accountUpdateBalanceController = new AccountUpdateBalanceController();
 const accountFindByIdController = new AccountFindByIdController();
 const accountDeletionController = new AccountDeletionController();
 
-accountsRouter.use(ensureAuthenticated)
+accountsRouter.use(ensureAuthenticated);
 
 accountsRouter.post(
   '/',
   celebrate({
     [Segments.BODY]: {
       user_id: Joi.string().required(),
-      bank_id: Joi.string().required()
+      bank_id: Joi.string().required(),
     },
   }),
-  accountRegistrationController.create
+  accountRegistrationController.create,
 );
 
 accountsRouter.put(
   '/:id/balance',
   celebrate({
     [Segments.PARAMS]: {
-      id: Joi.string().uuid().required()
+      id: Joi.string().uuid().required(),
     },
     [Segments.BODY]: {
-      balance: Joi.number().required()
+      balance: Joi.number().required(),
     },
   }),
-  accountUpdateBalanceController.update
+  accountUpdateBalanceController.update,
 );
 
 accountsRouter.get(
   '/:id',
   celebrate({
     [Segments.PARAMS]: {
-      id: Joi.string().uuid().required()
-    }
+      id: Joi.string().uuid().required(),
+    },
   }),
-  accountFindByIdController.get
+  accountFindByIdController.get,
 );
 
 accountsRouter.delete(
   '/:id',
   celebrate({
     [Segments.PARAMS]: {
-      id: Joi.string().uuid().required()
-    }
+      id: Joi.string().uuid().required(),
+    },
   }),
-  accountDeletionController.delete
+  accountDeletionController.delete,
 );
 
 export default accountsRouter;

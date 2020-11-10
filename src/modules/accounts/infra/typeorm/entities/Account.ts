@@ -29,7 +29,7 @@ class Account {
   @Column()
   bank_id: string;
 
-  @OneToMany(() => Transaction, transaction => transaction.from_account)
+  @OneToMany(() => Transaction, (transaction) => transaction.from_account)
   transactions: Transaction[];
 
   @ManyToOne(() => Bank)

@@ -1,7 +1,7 @@
-import {MigrationInterface, QueryRunner, Table} from "typeorm";
+import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class CreateTransactions1604542874765 implements MigrationInterface {
-
+export default class CreateTransactions1604542874765
+  implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
@@ -16,27 +16,27 @@ export class CreateTransactions1604542874765 implements MigrationInterface {
           },
           {
             name: 'from_account_id',
-            type: 'uuid'
+            type: 'uuid',
           },
           {
             name: 'to_account_id',
-            type: 'uuid'
+            type: 'uuid',
           },
           {
             name: 'type',
-            type: 'varchar'
+            type: 'varchar',
           },
           {
             name: 'value',
-            type: 'float'
+            type: 'float',
           },
           {
             name: 'bonusValue',
-            type: 'float'
+            type: 'float',
           },
           {
             name: 'transactionCost',
-            type: 'float'
+            type: 'float',
           },
           {
             name: 'created_at',
@@ -51,7 +51,7 @@ export class CreateTransactions1604542874765 implements MigrationInterface {
             referencedColumnNames: ['id'],
             columnNames: ['from_account_id'],
             onDelete: 'CASCADE',
-            onUpdate: 'CASCADE'
+            onUpdate: 'CASCADE',
           },
           {
             name: 'ToAccount',
@@ -59,8 +59,8 @@ export class CreateTransactions1604542874765 implements MigrationInterface {
             referencedColumnNames: ['id'],
             columnNames: ['to_account_id'],
             onDelete: 'CASCADE',
-            onUpdate: 'CASCADE'
-          }
+            onUpdate: 'CASCADE',
+          },
         ],
       }),
     );
@@ -69,5 +69,4 @@ export class CreateTransactions1604542874765 implements MigrationInterface {
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.dropTable('transactions');
   }
-
 }

@@ -1,4 +1,4 @@
-import { Repository, getRepository, Not, DeleteResult } from 'typeorm';
+import { Repository, getRepository } from 'typeorm';
 
 import IUsersRepository from '@modules/users/repositories/IUsersRepository';
 import ICreateUserDTO from '@modules/users/dtos/ICreateUserDTO';
@@ -35,8 +35,8 @@ class UsersRepository implements IUsersRepository {
   }
 
   public async delete(id: string): Promise<string> {
-    await this.ormRepository.delete(id)
-    return "User deleted!";
+    await this.ormRepository.delete(id);
+    return 'User deleted!';
   }
 }
 

@@ -1,4 +1,3 @@
-// index, show, create, update,
 import { Request, Response } from 'express';
 import { container } from 'tsyringe';
 import { classToClass } from 'class-transformer';
@@ -12,7 +11,7 @@ export default class BankUpdateController {
     const updateBank = container.resolve(UpdateBankService);
 
     const updatedBank = await updateBank.execute({
-      bank
+      bank,
     });
 
     return response.json(classToClass(updatedBank));

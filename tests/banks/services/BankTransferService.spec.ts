@@ -1,4 +1,6 @@
-import "reflect-metadata"
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable import/no-unresolved */
+import 'reflect-metadata';
 import Account from '@modules/accounts/infra/typeorm/entities/Account';
 import CreateAccountService from '@modules/accounts/services/CreateAccountService';
 import GetAccountByIdService from '@modules/accounts/services/GetAccountByIdService';
@@ -22,170 +24,186 @@ let accountWithDeposit: Account;
 let otherAccount: Account;
 
 describe('BankTransferService', () => {
-  const valueDeposited = 500
+  const valueDeposited = 500;
 
-  beforeAll(async() => {
-    await createConnections()
-  })
+  beforeAll(async () => {
+    await createConnections();
+  });
 
-  afterAll(async() => {
-    const connection = await getConnection()
-    await connection.close()
-  })
+  afterAll(async () => {
+    const connection = await getConnection();
+    await connection.close();
+  });
 
-  //Creates two accounts and deposits 500 in one of them
-  beforeEach(async() => {
-    await clearDb()
+  // Creates two accounts and deposits 500 in one of them
+  beforeEach(async () => {
+    await clearDb();
 
     createUser = new CreateUserService();
     createBank = new CreateBankService();
     createAccount = new CreateAccountService();
-    getAccountById = new GetAccountByIdService()
-    bankDeposit = new BankDepositService()
-    bankTransfer = new BankTransferService()
+    getAccountById = new GetAccountByIdService();
+    bankDeposit = new BankDepositService();
+    bankTransfer = new BankTransferService();
 
     const bank = await createBank.execute({
       name: 'Banco do Brasil',
-      cnpj: '00.000.000/0001-91'
+      cnpj: '00.000.000/0001-91',
     });
 
     const user = await createUser.execute({
       name: 'Giuseppe Mongiovi',
       cpf: '07346274407',
-      password: '123456'
+      password: '123456',
     });
 
     const otherUser = await createUser.execute({
       name: 'Jader Freitas',
       cpf: '659.351.910-32',
-      password: '123456'
+      password: '123456',
     });
 
     accountWithDeposit = await createAccount.execute({
       user_id: user.id,
-      bank_id: bank.id
+      bank_id: bank.id,
     });
 
     otherAccount = await createAccount.execute({
       user_id: otherUser.id,
-      bank_id: bank.id
+      bank_id: bank.id,
     });
 
     const depositResponse = await bankDeposit.execute({
       account_id: accountWithDeposit.id,
-      value: valueDeposited
-    })
+      value: valueDeposited,
+    });
 
-    accountWithDeposit = depositResponse.updatedAccount
+    accountWithDeposit = depositResponse.updatedAccount;
   });
 
   it('should be able to transfer from the account.', async () => {
-    const bonusValue = 0
-    const transactionCost = 0
-    const valueToTransfer = 100.5
-    const accountBalanceAfterTransfer = accountWithDeposit.balance - valueToTransfer
-    const otherAccountBalanceAfterTransfer = otherAccount.balance + valueToTransfer
+    const bonusValue = 0;
+    const transactionCost = 0;
+    const valueToTransfer = 100.5;
+    const accountBalanceAfterTransfer =
+      accountWithDeposit.balance - valueToTransfer;
+    const otherAccountBalanceAfterTransfer =
+      otherAccount.balance + valueToTransfer;
 
     const transferResponse = await bankTransfer.execute({
       from_account_id: accountWithDeposit.id,
       to_account_id: otherAccount.id,
-      value: valueToTransfer
-    })
+      value: valueToTransfer,
+    });
 
-    const accountAfterTransfer = transferResponse.updatedAccount
-    const transferTransaction = transferResponse.transaction
+    const accountAfterTransfer = transferResponse.updatedAccount;
+    const transferTransaction = transferResponse.transaction;
 
     const otherAccountAfterTransfer = await getAccountById.execute({
-      id: otherAccount.id
-    })
+      id: otherAccount.id,
+    });
 
     const expectedTransactionIsValid = isTransactionEquals(
-      transferTransaction, accountWithDeposit.id, otherAccount.id,
-      TransactionType.TRANSFER, valueToTransfer, bonusValue, transactionCost
-    )
+      transferTransaction,
+      accountWithDeposit.id,
+      otherAccount.id,
+      TransactionType.TRANSFER,
+      valueToTransfer,
+      bonusValue,
+      transactionCost,
+    );
 
     expect(transferTransaction).toHaveProperty('id');
     expect(expectedTransactionIsValid).toBeTruthy();
     expect(accountAfterTransfer.balance).toBe(accountBalanceAfterTransfer);
-    expect(otherAccountAfterTransfer.balance).toBe(otherAccountBalanceAfterTransfer);
+    expect(otherAccountAfterTransfer.balance).toBe(
+      otherAccountBalanceAfterTransfer,
+    );
   });
 
   it('should not be able to transfer to own account.', async () => {
-    const valueToTransfer = 100.5
+    const valueToTransfer = 100.5;
 
-    await expect(bankTransfer.execute({
+    await expect(
+      bankTransfer.execute({
         from_account_id: accountWithDeposit.id,
         to_account_id: accountWithDeposit.id,
-        value: valueToTransfer
-      })
+        value: valueToTransfer,
+      }),
     ).rejects.toMatchObject(
-      new AppError("Cannnot make a transfer to you own account.")
-    )
+      new AppError('Cannnot make a transfer to you own account.'),
+    );
   });
 
   it('should not be able to transfer to a nonexisting account', async () => {
-    const valueToTransfer = 100.5
+    const valueToTransfer = 100.5;
 
-    await expect(bankTransfer.execute({
+    await expect(
+      bankTransfer.execute({
         from_account_id: accountWithDeposit.id,
         to_account_id: '05766d27-f634-45ea-ac82-eb53ae5d67fe',
-        value: valueToTransfer
-      })
+        value: valueToTransfer,
+      }),
     ).rejects.toMatchObject(
-      new AppError('Cannot transfer to a nonexisting account.', 404)
-    )
+      new AppError('Cannot transfer to a nonexisting account.', 404),
+    );
   });
 
   it('should not be able to transfer from a nonexisting account', async () => {
-    const valueToTransfer = 100.5
+    const valueToTransfer = 100.5;
 
-    await expect(bankTransfer.execute({
+    await expect(
+      bankTransfer.execute({
         from_account_id: '05766d27-f634-45ea-ac82-eb53ae5d67fe',
         to_account_id: accountWithDeposit.id,
-        value: valueToTransfer
-      })
+        value: valueToTransfer,
+      }),
     ).rejects.toMatchObject(
-      new AppError('Cannot transfer from a nonexisting account.', 404)
-    )
+      new AppError('Cannot transfer from a nonexisting account.', 404),
+    );
   });
 
   it('should not be able to transfer a value that is not greater than zero.', async () => {
-    const valueZeroToTransfer = 0
+    const valueZeroToTransfer = 0;
 
-    await expect(bankTransfer.execute({
+    await expect(
+      bankTransfer.execute({
         from_account_id: accountWithDeposit.id,
         to_account_id: otherAccount.id,
-        value: valueZeroToTransfer
-      })
+        value: valueZeroToTransfer,
+      }),
     ).rejects.toMatchObject(
-      new AppError('Transfer value must be greater than zero.')
-    )
+      new AppError('Transfer value must be greater than zero.'),
+    );
 
-    const negativeValueToTransfer = -100
+    const negativeValueToTransfer = -100;
 
-    await expect(bankTransfer.execute({
+    await expect(
+      bankTransfer.execute({
         from_account_id: accountWithDeposit.id,
         to_account_id: otherAccount.id,
-        value: negativeValueToTransfer
-      })
+        value: negativeValueToTransfer,
+      }),
     ).rejects.toMatchObject(
-      new AppError('Transfer value must be greater than zero.')
-    )
+      new AppError('Transfer value must be greater than zero.'),
+    );
   });
 
   it('should not be able to transfer a value greater than the balance of who is transfering.', async () => {
-    const valueToTransfer = 20
+    const valueToTransfer = 20;
 
-    await expect(bankTransfer.execute({
+    await expect(
+      bankTransfer.execute({
         from_account_id: otherAccount.id,
         to_account_id: accountWithDeposit.id,
-        value: valueToTransfer
-      })
+        value: valueToTransfer,
+      }),
     ).rejects.toMatchObject(
       new AppError(
-        `Insufficient balance. The account's current balance is R$ ${otherAccount.balance.toFixed(2)}.`
-      )
-    )
+        `Insufficient balance. The account's current balance is R$ ${otherAccount.balance.toFixed(
+          2,
+        )}.`,
+      ),
+    );
   });
 });
-

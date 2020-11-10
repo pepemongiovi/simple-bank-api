@@ -1,4 +1,3 @@
-// index, show, create, update,
 import { Request, Response } from 'express';
 import { container } from 'tsyringe';
 import { classToClass } from 'class-transformer';
@@ -12,7 +11,7 @@ export default class BankDeletionController {
     const deleteBank = container.resolve(DeleteBankService);
 
     const bank = await deleteBank.execute({
-      id
+      id,
     });
 
     return response.json(classToClass(bank));

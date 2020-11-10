@@ -1,4 +1,6 @@
-import "reflect-metadata"
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable import/no-unresolved */
+import 'reflect-metadata';
 import AuthenticateUserService from '@modules/users/services/AuthenticateUserService';
 import CreateUserService from '@modules/users/services/CreateUserService';
 import AppError from '@shared/errors/AppError';
@@ -9,19 +11,19 @@ let authenticateUser: AuthenticateUserService;
 let createUserService: CreateUserService;
 
 describe('AuthenticateUser', () => {
-  beforeAll(async() => {
-    await createConnections()
-  })
+  beforeAll(async () => {
+    await createConnections();
+  });
 
-  afterAll(async() => {
-    const connection = await getConnection()
-    await connection.close()
-  })
+  afterAll(async () => {
+    const connection = await getConnection();
+    await connection.close();
+  });
 
   beforeEach(async () => {
-    await clearDb()
+    await clearDb();
 
-    createUserService = new CreateUserService()
+    createUserService = new CreateUserService();
     authenticateUser = new AuthenticateUserService();
   });
 
@@ -48,7 +50,7 @@ describe('AuthenticateUser', () => {
         password: '123456',
       }),
     ).rejects.toMatchObject(
-      new AppError('No user was found with the given CPF.', 404)
+      new AppError('No user was found with the given CPF.', 404),
     );
   });
 
@@ -64,8 +66,6 @@ describe('AuthenticateUser', () => {
         cpf: '07346274407',
         password: 'worng password',
       }),
-    ).rejects.toMatchObject(
-      new AppError('Incorrect password.', 401)
-    );
+    ).rejects.toMatchObject(new AppError('Incorrect password.', 401));
   });
 });
