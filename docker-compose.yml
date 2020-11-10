@@ -1,0 +1,40 @@
+version: '3.7'
+services:
+  redis:
+    image: redis
+    command: redis-server --requirepass donus
+    ports:
+      - "6379:6379"
+    networks:
+        - bank_net
+  postgres-db:
+    image: postgres:13.0
+    environment:
+      POSTGRES_PASSWORD: donus
+      POSTGRES_USER: postgres
+      POSTGRES_DB: bank_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./var/lib/postgresql/data
+    networks:
+      - bank_net
+  bank-api:
+    container_name: bank-api
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    depends_on:
+      - postgres-db
+      - redis
+    environment:
+      PORT: 3333
+      REDIS_HOST: redis
+      POSTGRES_HOST: postgres-db
+    ports:
+      - "3333:3333"
+    networks:
+      - bank_net
+networks:
+  bank_net:
+    driver: bridge
