@@ -5,9 +5,7 @@ import Account from '@modules/accounts/infra/typeorm/entities/Account';
 import IAccountsRepository from '@modules/accounts/repositories/IAccountsRepository';
 import ITransactionsRepository from '@modules/transactions/repositories/ITransactionsRepository';
 import Transaction, { TransactionType } from '@modules/transactions/infra/typeorm/entities/Transaction';
-import { EntityManager, getConnection, getManager, getRepository, TransactionRepository } from 'typeorm';
-import { isRuningTests } from '@shared/helpers/helper';
-import CreateTransactionService from '@modules/transactions/services/CreateTransactionService';
+import { getManager } from 'typeorm';
 import TransactionsRepository from '@modules/transactions/infra/typeorm/repositories/TransactionsRepository';
 import transactionsRouter from '@modules/transactions/infra/http/routes/transactions.routes';
 
