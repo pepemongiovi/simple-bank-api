@@ -4,9 +4,9 @@ services:
     image: redis
     command: redis-server --requirepass donus
     ports:
-      - "6379:6379"
+      - '6379:6379'
     networks:
-        - bank_net
+      - bank_net
   postgres-db:
     image: postgres:13.0
     environment:
@@ -32,10 +32,9 @@ services:
       REDIS_HOST: redis
       POSTGRES_HOST: postgres-db
     ports:
-      - "3333:3333"
+      - '3333:3333'
     networks:
       - bank_net
-    command: ["./wait-for-it.sh", "postgres-db:5432", "--", "yarn", "start"]
 networks:
   bank_net:
     driver: bridge
