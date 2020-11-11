@@ -35,6 +35,7 @@ services:
       - "3333:3333"
     networks:
       - bank_net
+    command: ["./wait-for-it.sh", "postgres-db:5432", "--", "yarn", "start"]
 networks:
   bank_net:
     driver: bridge

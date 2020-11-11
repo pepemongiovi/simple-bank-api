@@ -1,23 +1,26 @@
-#Definir imagem base
+#Defines base image
 FROM node:lts-alpine
 
-#Cria path para node_modules e dá permissão necessária
+#Creates path for node_modules
 RUN mkdir -p /home/node/api/node_modules
 
-#Setando diretório padrão
+#Setting default directory
 WORKDIR /home/node/api
 
-#Copia package.json e arquivos yarn para container
-COPY package.json yarn.* tsconfig.json ./
+#Installs bash
+RUN apk update && apk add bash
 
-#Instalar dependências básicas
+#Copies package.json and yarn file to container
+COPY package.json yarn.* tsconfig.json  ./
+
+#Installs dependencies
 RUN yarn
 
-#Copiar restante do código especificando o usuário
+#Copies rest of code
 COPY  . .
 
-#Expõe a porta
+#Exposes port
 EXPOSE 3333
 
-#Executa os comandos abaixo
+#Executes the commands bellow
 CMD ["yarn", "start"]
