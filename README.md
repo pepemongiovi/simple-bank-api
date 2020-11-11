@@ -1,6 +1,6 @@
 # Simple Bank API
 
-A simple bank api made with NodeJS using Typescript.
+A simple bank api made with NodeJS using Typescript, Docker and Redis for rate limiting.
 
 ## Prerequisites
 
