@@ -43,7 +43,10 @@ class BankDepositService {
         throw new AppError('Deposit value must be greater than zero.');
       }
 
-      const depositPercentageBonus = 0.5;
+      // eslint-disable-next-line radix
+      const depositPercentageBonus: number = parseInt(
+        process.env.DEPOSIT_PERCENTAGE_FOR_BONUS || '0.5',
+      );
       bonusValue = value * (depositPercentageBonus / 100);
       const newAccountBalance = account.balance + value + bonusValue;
 

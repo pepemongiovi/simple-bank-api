@@ -55,7 +55,10 @@ describe('CreateTransactionRoute', () => {
     const valueToBeDeposited = 100;
 
     const transactionCost = 0;
-    const depositPercentageBonus = 0.5;
+    // eslint-disable-next-line radix
+    const depositPercentageBonus: number = parseInt(
+      process.env.DEPOSIT_PERCENTAGE_FOR_BONUS || '0.5',
+    );
     const bonusValue = valueToBeDeposited * (depositPercentageBonus / 100);
 
     const transactionRes = await createTransactionForTests(
@@ -78,7 +81,10 @@ describe('CreateTransactionRoute', () => {
     const valueToBeDeposited = 100;
 
     const transactionCost = 0;
-    const depositPercentageBonus = 0.5;
+    // eslint-disable-next-line radix
+    const depositPercentageBonus: number = parseInt(
+      process.env.DEPOSIT_PERCENTAGE_FOR_BONUS || '0.5',
+    );
     const bonusValue = valueToBeDeposited * (depositPercentageBonus / 100);
 
     const transactionRes = await createTransactionForTests(
@@ -101,7 +107,10 @@ describe('CreateTransactionRoute', () => {
     const valueToBeDeposited = 100;
 
     const transactionCost = 0;
-    const depositPercentageBonus = 0.5;
+    // eslint-disable-next-line radix
+    const depositPercentageBonus: number = parseInt(
+      process.env.DEPOSIT_PERCENTAGE_FOR_BONUS || '0.5',
+    );
     const bonusValue = valueToBeDeposited * (depositPercentageBonus / 100);
 
     const transactionFakeFromAccountIdRes = await createTransactionForTests(

@@ -100,9 +100,12 @@ describe('MultipleBankDepositsTest', () => {
       );
     });
 
-    const valuePercentageForBonus = 0.5;
+    // eslint-disable-next-line radix
+    const depositPercentageBonus: number = parseInt(
+      process.env.DEPOSIT_PERCENTAGE_FOR_BONUS || '0.5',
+    );
     const bonusValue =
-      valueToBeDeposited * (valuePercentageForBonus / 100) * numberOfDeposits;
+      valueToBeDeposited * (depositPercentageBonus / 100) * numberOfDeposits;
     const expectedBalance = valueToBeDeposited * numberOfDeposits + bonusValue;
 
     const accountAfterDepositsRes = await getAccountByIdForTests(

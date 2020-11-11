@@ -78,7 +78,10 @@ describe('BankWithdrawService', () => {
     const withdrawTransaction = withdrawResponse.transaction;
 
     const bonusValue = 0;
-    const withdrawPercentageCost = 1;
+    // eslint-disable-next-line radix
+    const withdrawPercentageCost: number = parseInt(
+      process.env.WITHDRAW_PERCENTAGE_COST || '1',
+    );
     const transactionCost = valueToWithdraw * (withdrawPercentageCost / 100);
     const newAccountBalance =
       account.balance - valueToWithdraw - transactionCost;

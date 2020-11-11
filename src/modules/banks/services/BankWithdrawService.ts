@@ -41,7 +41,10 @@ class BankWithdrawService {
         throw new AppError('Withdraw value must be greater than zero.');
       }
 
-      const withdrawPercentageCost = 1;
+      // eslint-disable-next-line radix
+      const withdrawPercentageCost: number = parseInt(
+        process.env.WITHDRAW_PERCENTAGE_COST || '1',
+      );
       transactionCost = value * (withdrawPercentageCost / 100);
       const newAccountBalance = account.balance - value - transactionCost;
 

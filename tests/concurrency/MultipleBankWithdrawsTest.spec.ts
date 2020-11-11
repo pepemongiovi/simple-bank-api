@@ -114,9 +114,12 @@ describe('MultipleBankWithdrawsTest', () => {
       );
     });
 
-    const valuePercentageForBonus = 1;
+    // eslint-disable-next-line radix
+    const withdrawPercentageCost: number = parseInt(
+      process.env.WITHDRAW_PERCENTAGE_COST || '1',
+    );
     const transactionsCost =
-      valueToBeWithdrawn * (valuePercentageForBonus / 100) * numberOfDeposits;
+      valueToBeWithdrawn * (withdrawPercentageCost / 100) * numberOfDeposits;
     const totalCost = valueToBeWithdrawn * numberOfDeposits + transactionsCost;
     const expectedBalance = account.balance - totalCost;
 

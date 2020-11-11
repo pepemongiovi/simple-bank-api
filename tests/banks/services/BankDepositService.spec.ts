@@ -67,7 +67,10 @@ describe('BankDepositService', () => {
     });
 
     const transactionCost = 0;
-    const depositPercentageBonus = 0.5;
+    // eslint-disable-next-line radix
+    const depositPercentageBonus: number = parseInt(
+      process.env.DEPOSIT_PERCENTAGE_FOR_BONUS || '0.5',
+    );
     const bonusValue = valueToBeAdded * (depositPercentageBonus / 100);
     const valueWithBonus = valueToBeAdded + bonusValue;
 

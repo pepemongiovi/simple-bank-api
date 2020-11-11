@@ -75,7 +75,10 @@ describe('BankWithdrawRoute', () => {
     );
 
     const bonusValue = 0;
-    const withdrawPercentageCost = 1;
+    // eslint-disable-next-line radix
+    const withdrawPercentageCost: number = parseInt(
+      process.env.WITHDRAW_PERCENTAGE_COST || '1',
+    );
     const transactionCost =
       valueToBeWithdrawed * (withdrawPercentageCost / 100);
     const valueWithTransactionCost = valueToBeWithdrawed + transactionCost;
