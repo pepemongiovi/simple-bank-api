@@ -1,3 +1,5 @@
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable no-await-in-loop */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import Bank from '@modules/banks/infra/typeorm/entities/Bank';
@@ -31,10 +33,10 @@ export const clearDb = async () => {
 
   const entities = defaultConnection.entityMetadatas;
 
-  entities.forEach(async (entity: any) => {
+  for (const entity of entities) {
     const repository = await defaultConnection.getRepository(entity.name);
     await repository.query(`DELETE FROM ${entity.tableName};`);
-  });
+  }
 };
 
 export const isRuningTests = () => {
