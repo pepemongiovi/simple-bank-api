@@ -6,6 +6,8 @@ import GetUserByIdService from '@modules/users/services/GetUserByIdService';
 import AppError from '@shared/errors/AppError';
 import { clearDb } from '@shared/helpers/helper';
 import { createConnections, getConnection } from 'typeorm';
+import BCryptHashProvider from '@modules/users/providers/HashProvider/implementations/BCryptHashProvider';
+import UsersRepository from '@modules/users/infra/typeorm/repositories/UsersRepository';
 
 let getUserById: GetUserByIdService;
 let createUser: CreateUserService;
@@ -23,8 +25,14 @@ describe('GetByIdUser', () => {
   beforeEach(async () => {
     await clearDb();
 
-    createUser = new CreateUserService();
-    getUserById = new GetUserByIdService();
+    const userRepository = new UsersRepository();
+    const hasProvider = new BCryptHashProvider();
+
+    createUser = new CreateUserService(
+      hasProvider,
+      userRepository
+    );
+    getUserById = new GetUserByIdService(userRepository);
   });
 
   it('should be able to get a existing user.', async () => {

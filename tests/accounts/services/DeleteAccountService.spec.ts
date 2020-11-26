@@ -8,6 +8,10 @@ import DeleteAccountService from '@modules/accounts/services/DeleteAccountServic
 import CreateAccountService from '@modules/accounts/services/CreateAccountService';
 import { clearDb } from '@shared/helpers/helper';
 import { createConnections, getConnection } from 'typeorm';
+import AccountsRepository from '@modules/accounts/infra/typeorm/repositories/AccountsRepository';
+import UsersRepository from '@modules/users/infra/typeorm/repositories/UsersRepository';
+import BanksRepository from '@modules/banks/infra/typeorm/repositories/BanksRepository';
+import BCryptHashProvider from '@modules/users/providers/HashProvider/implementations/BCryptHashProvider';
 
 let deleteAccount: DeleteAccountService;
 let createUser: CreateUserService;
@@ -27,10 +31,22 @@ describe('DeleteAccount', () => {
   beforeEach(async () => {
     await clearDb();
 
-    createAccount = new CreateAccountService();
-    createUser = new CreateUserService();
-    createBank = new CreateBankService();
-    deleteAccount = new DeleteAccountService();
+    const userRepository = new UsersRepository();
+    const banksRepository = new BanksRepository();
+    const accountsRepository = new AccountsRepository();
+    const hasProvider = new BCryptHashProvider();
+
+    createAccount = new CreateAccountService(
+      userRepository,
+      banksRepository,
+      accountsRepository,
+    );
+    createUser = new CreateUserService(
+      hasProvider,
+      userRepository
+    );
+    createBank = new CreateBankService(banksRepository);
+    deleteAccount = new DeleteAccountService(accountsRepository);
   });
 
   it('should be able to delete a existing account.', async () => {

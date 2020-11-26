@@ -6,6 +6,8 @@ import UpdateUserService from '@modules/users/services/UpdateUserService';
 import AppError from '@shared/errors/AppError';
 import { clearDb } from '@shared/helpers/helper';
 import { createConnections, getConnection } from 'typeorm';
+import BCryptHashProvider from '@modules/users/providers/HashProvider/implementations/BCryptHashProvider';
+import UsersRepository from '@modules/users/infra/typeorm/repositories/UsersRepository';
 
 let updateUser: UpdateUserService;
 let createUser: CreateUserService;
@@ -23,8 +25,14 @@ describe('UpdateUser', () => {
   beforeEach(async () => {
     await clearDb();
 
-    createUser = new CreateUserService();
-    updateUser = new UpdateUserService();
+    const userRepository = new UsersRepository();
+    const hasProvider = new BCryptHashProvider();
+
+    createUser = new CreateUserService(
+      hasProvider,
+      userRepository
+    );
+    updateUser = new UpdateUserService(userRepository);
   });
 
   it('should be able to update a existing user.', async () => {

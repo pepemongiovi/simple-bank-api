@@ -1,22 +1,21 @@
-import { injectable } from 'tsyringe';
+import { inject, injectable } from 'tsyringe';
 import AppError from '@shared/errors/AppError';
 import User from '../infra/typeorm/entities/User';
-import UsersRepository from '../infra/typeorm/repositories/UsersRepository';
+import IUsersRepository from '../repositories/IUsersRepository';
 
 interface IRequest {
   id: string;
 }
 
-let usersRepository: UsersRepository;
-
 @injectable()
 class GetUserByIdService {
-  constructor() {
-    usersRepository = new UsersRepository();
-  }
+  constructor(
+    @inject('UsersRepository')
+    private usersRepository: IUsersRepository
+  ) {}
 
   async execute({ id }: IRequest): Promise<User | undefined> {
-    const user = await usersRepository.findById(id);
+    const user = await this.usersRepository.findById(id);
 
     if (!user) {
       throw new AppError('No user found with the given id.', 404);

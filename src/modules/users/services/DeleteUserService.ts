@@ -1,28 +1,26 @@
-import { injectable } from 'tsyringe';
-
+import { inject, injectable } from 'tsyringe';
 import AppError from '@shared/errors/AppError';
-import UsersRepository from '../infra/typeorm/repositories/UsersRepository';
+import IUsersRepository from '../repositories/IUsersRepository';
 
 interface IRequest {
   id: string;
 }
 
-let usersRepository: UsersRepository;
-
 @injectable()
 class DeleteUserService {
-  constructor() {
-    usersRepository = new UsersRepository();
-  }
+  constructor(
+    @inject('UsersRepository')
+    private usersRepository: IUsersRepository
+  ) {}
 
   async execute({ id }: IRequest): Promise<string> {
-    const user = await usersRepository.findById(id);
+    const user = await this.usersRepository.findById(id);
 
     if (!user) {
       throw new AppError('No user found with the given id.', 404);
     }
 
-    const result = await usersRepository.delete(id);
+    const result = await this.usersRepository.delete(id);
 
     return result;
   }

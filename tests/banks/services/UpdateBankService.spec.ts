@@ -6,6 +6,7 @@ import UpdateBankService from '@modules/banks/services/UpdateBankService';
 import AppError from '@shared/errors/AppError';
 import { clearDb } from '@shared/helpers/helper';
 import { createConnections, getConnection } from 'typeorm';
+import BanksRepository from '@modules/banks/infra/typeorm/repositories/BanksRepository';
 
 let updateBank: UpdateBankService;
 let createBank: CreateBankService;
@@ -23,8 +24,10 @@ describe('UpdateBankService', () => {
   beforeEach(async () => {
     await clearDb();
 
-    createBank = new CreateBankService();
-    updateBank = new UpdateBankService();
+    const banksRepository = new BanksRepository();
+
+    createBank = new CreateBankService(banksRepository);
+    updateBank = new UpdateBankService(banksRepository);
   });
 
   it('should be able to update a existing bank.', async () => {

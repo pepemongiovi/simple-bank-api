@@ -11,6 +11,10 @@ import CreateUserService from '@modules/users/services/CreateUserService';
 import AppError from '@shared/errors/AppError';
 import { clearDb } from '@shared/helpers/helper';
 import { createConnections, getConnection } from 'typeorm';
+import AccountsRepository from '@modules/accounts/infra/typeorm/repositories/AccountsRepository';
+import BanksRepository from '@modules/banks/infra/typeorm/repositories/BanksRepository';
+import UsersRepository from '@modules/users/infra/typeorm/repositories/UsersRepository';
+import BCryptHashProvider from '@modules/users/providers/HashProvider/implementations/BCryptHashProvider';
 
 let updateAccountBalance: UpdateAccountBalanceService;
 let createAccount: CreateAccountService;
@@ -34,10 +38,22 @@ describe('UpdateAccountBalance', () => {
   beforeEach(async () => {
     await clearDb();
 
-    createUser = new CreateUserService();
-    createBank = new CreateBankService();
-    createAccount = new CreateAccountService();
-    updateAccountBalance = new UpdateAccountBalanceService();
+    const userRepository = new UsersRepository();
+    const banksRepository = new BanksRepository();
+    const accountsRepository = new AccountsRepository();
+    const hasProvider = new BCryptHashProvider();
+
+    createAccount = new CreateAccountService(
+      userRepository,
+      banksRepository,
+      accountsRepository,
+    );
+    createUser = new CreateUserService(
+      hasProvider,
+      userRepository
+    );
+    createBank = new CreateBankService(banksRepository);
+    updateAccountBalance = new UpdateAccountBalanceService(accountsRepository);
 
     bank = await createBank.execute({
       name: 'Banco do Brasil',

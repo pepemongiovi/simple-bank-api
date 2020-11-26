@@ -9,6 +9,11 @@ import CreateUserService from '@modules/users/services/CreateUserService';
 import AppError from '@shared/errors/AppError';
 import { clearDb, isTransactionEquals } from '@shared/helpers/helper';
 import { createConnections, getConnection } from 'typeorm';
+import UsersRepository from '@modules/users/infra/typeorm/repositories/UsersRepository';
+import BanksRepository from '@modules/banks/infra/typeorm/repositories/BanksRepository';
+import AccountsRepository from '@modules/accounts/infra/typeorm/repositories/AccountsRepository';
+import TransactionsRepository from '@modules/transactions/infra/typeorm/repositories/TransactionsRepository';
+import BCryptHashProvider from '@modules/users/providers/HashProvider/implementations/BCryptHashProvider';
 
 let bankDeposit: BankDepositService;
 let createAccount: CreateAccountService;
@@ -30,10 +35,24 @@ describe('BankDepositService', () => {
   beforeEach(async () => {
     await clearDb();
 
-    createUser = new CreateUserService();
-    createBank = new CreateBankService();
-    createAccount = new CreateAccountService();
-    bankDeposit = new BankDepositService();
+    const userRepository = new UsersRepository();
+    const banksRepository = new BanksRepository();
+    const accountsRepository = new AccountsRepository();
+    const transactionsRepository = new TransactionsRepository();
+    const hasProvider = new BCryptHashProvider();
+
+    createAccount = new CreateAccountService(
+      userRepository,
+      banksRepository,
+      accountsRepository,
+    );
+
+    createUser = new CreateUserService(
+      hasProvider,
+      userRepository
+    );
+    createBank = new CreateBankService(banksRepository);
+    bankDeposit = new BankDepositService(transactionsRepository);
   });
 
   beforeEach(async () => {

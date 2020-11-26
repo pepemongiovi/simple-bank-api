@@ -1,24 +1,21 @@
-import { injectable } from 'tsyringe';
-
+import { inject, injectable } from 'tsyringe';
 import AppError from '@shared/errors/AppError';
-
 import Bank from '../infra/typeorm/entities/Bank';
-import BanksRepository from '../infra/typeorm/repositories/BanksRepository';
+import IBanksRepository from '../repositories/IBanksRepository';
 
 interface IRequest {
   id: string;
 }
 
-let banksRepository: BanksRepository;
-
 @injectable()
 class GetBankByIdService {
-  constructor() {
-    banksRepository = new BanksRepository();
-  }
+  constructor(
+    @inject('BanksRepository')
+    private banksRepository: IBanksRepository,
+  ) { }
 
   async execute({ id }: IRequest): Promise<Bank | undefined> {
-    const bank = await banksRepository.findById(id);
+    const bank = await this.banksRepository.findById(id);
 
     if (!bank) {
       throw new AppError('No bank found with the given id.', 404);

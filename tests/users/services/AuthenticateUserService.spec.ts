@@ -6,6 +6,8 @@ import CreateUserService from '@modules/users/services/CreateUserService';
 import AppError from '@shared/errors/AppError';
 import { clearDb } from '@shared/helpers/helper';
 import { createConnections, getConnection } from 'typeorm';
+import BCryptHashProvider from '@modules/users/providers/HashProvider/implementations/BCryptHashProvider';
+import UsersRepository from '@modules/users/infra/typeorm/repositories/UsersRepository';
 
 let authenticateUser: AuthenticateUserService;
 let createUserService: CreateUserService;
@@ -23,8 +25,17 @@ describe('AuthenticateUser', () => {
   beforeEach(async () => {
     await clearDb();
 
-    createUserService = new CreateUserService();
-    authenticateUser = new AuthenticateUserService();
+    const userRepository = new UsersRepository();
+    const hasProvider = new BCryptHashProvider();
+
+    createUserService = new CreateUserService(
+      hasProvider,
+      userRepository
+    );
+    authenticateUser = new AuthenticateUserService(
+      hasProvider,
+      userRepository,
+    );
   });
 
   it('should be able to authenticate', async () => {

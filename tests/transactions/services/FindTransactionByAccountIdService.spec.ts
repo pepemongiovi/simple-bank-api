@@ -11,6 +11,11 @@ import AppError from '@shared/errors/AppError';
 import { clearDb } from '@shared/helpers/helper';
 import { createConnections, getConnection } from 'typeorm';
 import FindTransactionsByAccountIdService from '@modules/transactions/services/FindTransactionsByAccountIdService';
+import AccountsRepository from '@modules/accounts/infra/typeorm/repositories/AccountsRepository';
+import BanksRepository from '@modules/banks/infra/typeorm/repositories/BanksRepository';
+import UsersRepository from '@modules/users/infra/typeorm/repositories/UsersRepository';
+import BCryptHashProvider from '@modules/users/providers/HashProvider/implementations/BCryptHashProvider';
+import TransactionsRepository from '@modules/transactions/infra/typeorm/repositories/TransactionsRepository';
 
 let createTransaction: CreateTransactionService;
 let createAccount: CreateAccountService;
@@ -33,11 +38,31 @@ describe('FindTransactionByAccountId', () => {
   beforeEach(async () => {
     await clearDb();
 
-    createUser = new CreateUserService();
-    createBank = new CreateBankService();
-    createAccount = new CreateAccountService();
-    createTransaction = new CreateTransactionService();
-    findTransactionsByAccountId = new FindTransactionsByAccountIdService();
+    const userRepository = new UsersRepository();
+    const banksRepository = new BanksRepository();
+    const accountsRepository = new AccountsRepository();
+    const hasProvider = new BCryptHashProvider();
+    const transactionsRepository = new TransactionsRepository();
+
+    createAccount = new CreateAccountService(
+      userRepository,
+      banksRepository,
+      accountsRepository,
+    );
+
+    createUser = new CreateUserService(
+      hasProvider,
+      userRepository
+    );
+    createBank = new CreateBankService(banksRepository);
+    createTransaction = new CreateTransactionService(
+      transactionsRepository,
+      accountsRepository,
+    );
+    findTransactionsByAccountId = new FindTransactionsByAccountIdService(
+      transactionsRepository,
+      accountsRepository,
+    );
 
     const bank = await createBank.execute({
       name: 'Banco do Brasil',

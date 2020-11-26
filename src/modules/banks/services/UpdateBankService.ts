@@ -1,28 +1,26 @@
-import { injectable } from 'tsyringe';
-
+import { inject, injectable } from 'tsyringe';
 import AppError from '@shared/errors/AppError';
 import { cnpj as cnpjValidator } from 'cpf-cnpj-validator';
-
 import Bank from '../infra/typeorm/entities/Bank';
-import BanksRepository from '../infra/typeorm/repositories/BanksRepository';
+import IBanksRepository from '../repositories/IBanksRepository';
 
 interface IRequest {
   bank: Bank;
 }
 
-let banksRepository: BanksRepository;
 
 @injectable()
 class UpdateBankService {
-  constructor() {
-    banksRepository = new BanksRepository();
-  }
+  constructor(
+    @inject('BanksRepository')
+    private banksRepository: IBanksRepository,
+  ) { }
 
   async execute({ bank }: IRequest): Promise<Bank> {
-    const originalBank = await banksRepository.findById(bank.id);
+    const originalBank = await this.banksRepository.findById(bank.id);
     const isCNPJValid = cnpjValidator.isValid(bank.cnpj);
     const isCNPJTaken =
-      (await banksRepository.findByCNPJ(bank.cnpj)) &&
+      (await this.banksRepository.findByCNPJ(bank.cnpj)) &&
       originalBank?.cnpj !== bank.cnpj;
 
     if (!originalBank) {
@@ -33,7 +31,7 @@ class UpdateBankService {
       throw new AppError('Bank with this CNPJ already exists.', 403);
     }
 
-    const updatedBank = await banksRepository.save(bank);
+    const updatedBank = await this.banksRepository.save(bank);
 
     return updatedBank;
   }

@@ -12,6 +12,11 @@ import AppError from '@shared/errors/AppError';
 import { clearDb } from '@shared/helpers/helper';
 import { addMonths, endOfDay, startOfDay } from 'date-fns';
 import { createConnections, getConnection } from 'typeorm';
+import UsersRepository from '@modules/users/infra/typeorm/repositories/UsersRepository';
+import AccountsRepository from '@modules/accounts/infra/typeorm/repositories/AccountsRepository';
+import BanksRepository from '@modules/banks/infra/typeorm/repositories/BanksRepository';
+import TransactionsRepository from '@modules/transactions/infra/typeorm/repositories/TransactionsRepository';
+import BCryptHashProvider from '@modules/users/providers/HashProvider/implementations/BCryptHashProvider';
 
 let bankTransactionHistory: BankTransactionHistoryService;
 let createAccount: CreateAccountService;
@@ -41,11 +46,28 @@ describe('BankTransactionHistoryService', () => {
   beforeEach(async () => {
     await clearDb();
 
-    createUser = new CreateUserService();
-    createBank = new CreateBankService();
-    createAccount = new CreateAccountService();
-    bankDeposit = new BankDepositService();
-    bankTransactionHistory = new BankTransactionHistoryService();
+    const userRepository = new UsersRepository();
+    const banksRepository = new BanksRepository();
+    const accountsRepository = new AccountsRepository();
+    const transactionsRepository = new TransactionsRepository();
+    const hasProvider = new BCryptHashProvider();
+
+    createAccount = new CreateAccountService(
+      userRepository,
+      banksRepository,
+      accountsRepository,
+    );
+
+    createUser = new CreateUserService(
+      hasProvider,
+      userRepository
+    );
+    createBank = new CreateBankService(banksRepository);
+    bankDeposit = new BankDepositService(transactionsRepository);
+    bankTransactionHistory = new BankTransactionHistoryService(
+      accountsRepository,
+      transactionsRepository,
+    );
 
     const bank = await createBank.execute({
       name: 'Banco do Brasil',

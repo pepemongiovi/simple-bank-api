@@ -1,26 +1,25 @@
-import { injectable } from 'tsyringe';
+import { inject, injectable } from 'tsyringe';
 import AppError from '@shared/errors/AppError';
 import { cpf as cpfValidator } from 'cpf-cnpj-validator';
 import User from '../infra/typeorm/entities/User';
-import UsersRepository from '../infra/typeorm/repositories/UsersRepository';
+import IUsersRepository from '../repositories/IUsersRepository';
 
 interface IRequest {
   user: User;
 }
 
-let usersRepository: UsersRepository;
-
 @injectable()
 class UpdateUserService {
-  constructor() {
-    usersRepository = new UsersRepository();
-  }
+  constructor(
+    @inject('UsersRepository')
+    private usersRepository: IUsersRepository
+  ) {}
 
   async execute({ user }: IRequest): Promise<User> {
-    const originalUser = await usersRepository.findById(user.id);
+    const originalUser = await this.usersRepository.findById(user.id);
     const isCPFValid = cpfValidator.isValid(user.cpf);
     const isCPFTaken =
-      (await usersRepository.findByCPF(user.cpf)) &&
+      (await this.usersRepository.findByCPF(user.cpf)) &&
       user.cpf !== originalUser?.cpf;
 
     if (!originalUser) {
@@ -31,7 +30,7 @@ class UpdateUserService {
       throw new AppError('User with this CPF already exists.', 403);
     }
 
-    const updatedUser = await usersRepository.save(user);
+    const updatedUser = await this.usersRepository.save(user);
 
     return updatedUser;
   }

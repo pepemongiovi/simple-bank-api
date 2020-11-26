@@ -1,31 +1,30 @@
-import { injectable } from 'tsyringe';
+import { inject, injectable } from 'tsyringe';
 import AppError from '@shared/errors/AppError';
-import AccountsRepository from '@modules/accounts/infra/typeorm/repositories/AccountsRepository';
 import Transaction from '../infra/typeorm/entities/Transaction';
-import TransactionsRepository from '../infra/typeorm/repositories/TransactionsRepository';
+import ITransactionsRepository from '../repositories/ITransactionsRepository';
+import IAccountsRepository from '@modules/accounts/repositories/IAccountsRepository';
 
 interface IRequest {
   account_id: string;
 }
 
-let transactionsRepository: TransactionsRepository;
-let accountsRepository: AccountsRepository;
-
 @injectable()
 class FindTransactionsByAccountIdService {
-  constructor() {
-    accountsRepository = new AccountsRepository();
-    transactionsRepository = new TransactionsRepository();
-  }
+  constructor(
+    @inject('TransactionsRepository')
+    private transactionsRepository: ITransactionsRepository,
+    @inject('AccountsRepository')
+    private accountsRepository: IAccountsRepository
+  ) {}
 
   async execute({ account_id }: IRequest): Promise<Transaction[]> {
-    const account = await accountsRepository.findById(account_id);
+    const account = await this.accountsRepository.findById(account_id);
 
     if (!account) {
       throw new AppError('No account found for given account id.', 404);
     }
 
-    const transactions = await transactionsRepository.findByAccountId(
+    const transactions = await this.transactionsRepository.findByAccountId(
       account_id,
     );
 

@@ -6,6 +6,7 @@ import DeleteBankService from '@modules/banks/services/DeleteBankService';
 import AppError from '@shared/errors/AppError';
 import { clearDb } from '@shared/helpers/helper';
 import { createConnections, getConnection } from 'typeorm';
+import BanksRepository from '@modules/banks/infra/typeorm/repositories/BanksRepository';
 
 let deleteBank: DeleteBankService;
 let createBank: CreateBankService;
@@ -23,8 +24,10 @@ describe('DeleteBankService', () => {
   beforeEach(async () => {
     await clearDb();
 
-    createBank = new CreateBankService();
-    deleteBank = new DeleteBankService();
+    const banksRepository = new BanksRepository();
+
+    createBank = new CreateBankService(banksRepository);
+    deleteBank = new DeleteBankService(banksRepository);
   });
 
   it('should be able to delete a existing bank.', async () => {

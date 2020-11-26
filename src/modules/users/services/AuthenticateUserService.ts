@@ -1,10 +1,10 @@
 import { sign } from 'jsonwebtoken';
 import authConfig from '@config/auth';
-import { injectable } from 'tsyringe';
+import { inject, injectable } from 'tsyringe';
 import AppError from '@shared/errors/AppError';
 import User from '../infra/typeorm/entities/User';
-import UsersRepository from '../infra/typeorm/repositories/UsersRepository';
-import BCryptHashProvider from '../providers/HashProvider/implementations/BCryptHashProvider';
+import IUsersRepository from '../repositories/IUsersRepository';
+import IHashProvider from '../providers/HashProvider/models/IHashProvider';
 
 interface IRequest {
   cpf: string;
@@ -16,24 +16,23 @@ interface IResponse {
   token: string;
 }
 
-let usersRepository: UsersRepository;
-let hashProvider: BCryptHashProvider;
-
 @injectable()
 class AuthenticateUserService {
-  constructor() {
-    hashProvider = new BCryptHashProvider();
-    usersRepository = new UsersRepository();
-  }
+  constructor(
+    @inject('HashProvider')
+    private hashProvider: IHashProvider,
+    @inject('UsersRepository')
+    private usersRepository: IUsersRepository
+  ) {}
 
   public async execute({ cpf, password }: IRequest): Promise<IResponse> {
-    const user = await usersRepository.findByCPF(cpf);
+    const user = await this.usersRepository.findByCPF(cpf);
 
     if (!user) {
       throw new AppError('No user was found with the given CPF.', 404);
     }
 
-    const passwordMatched = await hashProvider.compareHash(
+    const passwordMatched = await this.hashProvider.compareHash(
       password,
       user.password,
     );

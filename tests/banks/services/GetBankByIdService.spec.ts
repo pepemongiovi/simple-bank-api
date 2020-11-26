@@ -6,6 +6,7 @@ import GetBankByIdService from '@modules/banks/services/GetBankByIdService';
 import AppError from '@shared/errors/AppError';
 import { clearDb } from '@shared/helpers/helper';
 import { createConnections, getConnection } from 'typeorm';
+import BanksRepository from '@modules/banks/infra/typeorm/repositories/BanksRepository';
 
 let getBankById: GetBankByIdService;
 let createBank: CreateBankService;
@@ -23,8 +24,10 @@ describe('GetByIdBankService', () => {
   beforeEach(async () => {
     await clearDb();
 
-    createBank = new CreateBankService();
-    getBankById = new GetBankByIdService();
+    const banksRepository = new BanksRepository();
+
+    createBank = new CreateBankService(banksRepository);
+    getBankById = new GetBankByIdService(banksRepository);
   });
 
   it('should be able to get a existing bank.', async () => {

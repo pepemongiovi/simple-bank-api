@@ -12,6 +12,11 @@ import CreateUserService from '@modules/users/services/CreateUserService';
 import AppError from '@shared/errors/AppError';
 import { clearDb, isTransactionEquals } from '@shared/helpers/helper';
 import { createConnections, getConnection } from 'typeorm';
+import UsersRepository from '@modules/users/infra/typeorm/repositories/UsersRepository';
+import BanksRepository from '@modules/banks/infra/typeorm/repositories/BanksRepository';
+import AccountsRepository from '@modules/accounts/infra/typeorm/repositories/AccountsRepository';
+import TransactionsRepository from '@modules/transactions/infra/typeorm/repositories/TransactionsRepository';
+import BCryptHashProvider from '@modules/users/providers/HashProvider/implementations/BCryptHashProvider';
 
 let getAccountById: GetAccountByIdService;
 let bankDeposit: BankDepositService;
@@ -39,12 +44,26 @@ describe('BankTransferService', () => {
   beforeEach(async () => {
     await clearDb();
 
-    createUser = new CreateUserService();
-    createBank = new CreateBankService();
-    createAccount = new CreateAccountService();
-    getAccountById = new GetAccountByIdService();
-    bankDeposit = new BankDepositService();
-    bankTransfer = new BankTransferService();
+    const userRepository = new UsersRepository();
+    const banksRepository = new BanksRepository();
+    const accountsRepository = new AccountsRepository();
+    const transactionsRepository = new TransactionsRepository();
+    const hasProvider = new BCryptHashProvider();
+
+    createAccount = new CreateAccountService(
+      userRepository,
+      banksRepository,
+      accountsRepository,
+    );
+
+    createUser = new CreateUserService(
+      hasProvider,
+      userRepository
+    );
+    createBank = new CreateBankService(banksRepository);
+    getAccountById = new GetAccountByIdService(accountsRepository);
+    bankDeposit = new BankDepositService(transactionsRepository);
+    bankTransfer = new BankTransferService(transactionsRepository);
 
     const bank = await createBank.execute({
       name: 'Banco do Brasil',

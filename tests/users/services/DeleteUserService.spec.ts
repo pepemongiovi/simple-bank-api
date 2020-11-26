@@ -6,6 +6,8 @@ import DeleteUserService from '@modules/users/services/DeleteUserService';
 import AppError from '@shared/errors/AppError';
 import { clearDb } from '@shared/helpers/helper';
 import { createConnections, getConnection } from 'typeorm';
+import BCryptHashProvider from '@modules/users/providers/HashProvider/implementations/BCryptHashProvider';
+import UsersRepository from '@modules/users/infra/typeorm/repositories/UsersRepository';
 
 let deleteUser: DeleteUserService;
 let createUser: CreateUserService;
@@ -23,8 +25,14 @@ describe('DeleteUser', () => {
   beforeEach(async () => {
     await clearDb();
 
-    createUser = new CreateUserService();
-    deleteUser = new DeleteUserService();
+    const userRepository = new UsersRepository();
+    const hasProvider = new BCryptHashProvider();
+
+    createUser = new CreateUserService(
+      hasProvider,
+      userRepository
+    );
+    deleteUser = new DeleteUserService(userRepository);
   });
 
   it('should be able to delete a existing user.', async () => {

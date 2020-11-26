@@ -1,10 +1,10 @@
-import { injectable } from 'tsyringe';
+import { inject, injectable } from 'tsyringe';
 import AppError from '@shared/errors/AppError';
-import AccountsRepository from '@modules/accounts/infra/typeorm/repositories/AccountsRepository';
-import TransactionsRepository from '../infra/typeorm/repositories/TransactionsRepository';
 import Transaction, {
   TransactionType,
 } from '../infra/typeorm/entities/Transaction';
+import IAccountsRepository from '@modules/accounts/repositories/IAccountsRepository';
+import ITransactionsRepository from '../repositories/ITransactionsRepository';
 
 interface IRequest {
   from_account_id: string;
@@ -15,15 +15,14 @@ interface IRequest {
   transactionCost: number;
 }
 
-let transactionsRepository: TransactionsRepository;
-let accountsRepository: AccountsRepository;
-
 @injectable()
 class CreateTransactionService {
-  constructor() {
-    accountsRepository = new AccountsRepository();
-    transactionsRepository = new TransactionsRepository();
-  }
+  constructor(
+    @inject('TransactionsRepository')
+    private transactionsRepository: ITransactionsRepository,
+    @inject('AccountsRepository')
+    private accountsRepository: IAccountsRepository
+  ) {}
 
   async execute({
     from_account_id,
@@ -33,10 +32,10 @@ class CreateTransactionService {
     bonusValue,
     transactionCost,
   }: IRequest): Promise<Transaction> {
-    const isFromAccountIdValid = await accountsRepository.findById(
+    const isFromAccountIdValid = await this.accountsRepository.findById(
       from_account_id,
     );
-    const isToAccountIdValid = await accountsRepository.findById(to_account_id);
+    const isToAccountIdValid = await this.accountsRepository.findById(to_account_id);
 
     if (!isFromAccountIdValid) {
       throw new AppError('No account found for given from_account_id.', 404);
@@ -50,7 +49,7 @@ class CreateTransactionService {
       throw new AppError('Transaction cost must be greater than zero.');
     }
 
-    const transaction = await transactionsRepository.create({
+    const transaction = await this.transactionsRepository.create({
       from_account_id,
       to_account_id,
       type,

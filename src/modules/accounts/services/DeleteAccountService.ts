@@ -1,27 +1,26 @@
-import { injectable } from 'tsyringe';
+import { inject, injectable } from 'tsyringe';
 import AppError from '@shared/errors/AppError';
-import AccountsRepository from '../infra/typeorm/repositories/AccountsRepository';
+import IAccountsRepository from '../repositories/IAccountsRepository';
 
 interface IRequest {
   id: string;
 }
-
-let accountsRepository: AccountsRepository;
-
 @injectable()
 class DeleteAccountService {
-  constructor() {
-    accountsRepository = new AccountsRepository();
+  constructor(
+    @inject('AccountsRepository')
+    private accountsRepository: IAccountsRepository
+  ) {
   }
 
   async execute({ id }: IRequest): Promise<string> {
-    const account = await accountsRepository.findById(id);
+    const account = await this.accountsRepository.findById(id);
 
     if (!account) {
       throw new AppError('No account found with the given id.', 404);
     }
 
-    const result = await accountsRepository.delete(id);
+    const result = await this.accountsRepository.delete(id);
 
     return result;
   }

@@ -5,6 +5,7 @@ import CreateBankService from '@modules/banks/services/CreateBankService';
 import AppError from '@shared/errors/AppError';
 import { clearDb } from '@shared/helpers/helper';
 import { createConnections, getConnection } from 'typeorm';
+import BanksRepository from '@modules/banks/infra/typeorm/repositories/BanksRepository';
 
 let createBank: CreateBankService;
 
@@ -21,7 +22,9 @@ describe('CreateBankService', () => {
   beforeEach(async () => {
     await clearDb();
 
-    createBank = new CreateBankService();
+    const banksRepository = new BanksRepository();
+
+    createBank = new CreateBankService(banksRepository);
   });
 
   it('should be able to create a new bank.', async () => {

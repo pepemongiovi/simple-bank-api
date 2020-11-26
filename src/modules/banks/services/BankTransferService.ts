@@ -1,12 +1,12 @@
-import { injectable } from 'tsyringe';
+import { inject, injectable } from 'tsyringe';
 
 import AppError from '@shared/errors/AppError';
 import Account from '@modules/accounts/infra/typeorm/entities/Account';
 import Transaction, {
   TransactionType,
 } from '@modules/transactions/infra/typeorm/entities/Transaction';
-import TransactionsRepository from '@modules/transactions/infra/typeorm/repositories/TransactionsRepository';
 import { getManager } from 'typeorm';
+import ITransactionsRepository from '@modules/transactions/repositories/ITransactionsRepository';
 
 interface IRequest {
   from_account_id: string;
@@ -19,13 +19,12 @@ interface IRequestReturn {
   transaction: Transaction;
 }
 
-let transactionsRepository: TransactionsRepository;
-
 @injectable()
 class BankTransferService {
-  constructor() {
-    transactionsRepository = new TransactionsRepository();
-  }
+  constructor(
+    @inject('TransactionsRepository')
+    private transactionsRepository: ITransactionsRepository,
+  ) { }
 
   async execute({
     from_account_id,
@@ -87,7 +86,7 @@ class BankTransferService {
       await entityManager.save(toAccount);
     });
 
-    const transaction = await transactionsRepository.create({
+    const transaction = await this.transactionsRepository.create({
       from_account_id,
       to_account_id,
       type: TransactionType.TRANSFER,

@@ -1,32 +1,30 @@
-import { injectable } from 'tsyringe';
+import { inject, injectable } from 'tsyringe';
 
 import AppError from '@shared/errors/AppError';
-import UsersRepository from '@modules/users/infra/typeorm/repositories/UsersRepository';
-import BanksRepository from '@modules/banks/infra/typeorm/repositories/BanksRepository';
 import Account from '../infra/typeorm/entities/Account';
-import AccountsRepository from '../infra/typeorm/repositories/AccountsRepository';
+import IUsersRepository from '@modules/users/repositories/IUsersRepository';
+import IBanksRepository from '@modules/banks/repositories/IBanksRepository';
+import IAccountsRepository from '../repositories/IAccountsRepository';
 
 interface IRequest {
   user_id: string;
   bank_id: string;
 }
-
-let accountsRepository: AccountsRepository;
-let usersRepository: UsersRepository;
-let banksRepository: BanksRepository;
-
 @injectable()
 class CreateAccountService {
-  constructor() {
-    usersRepository = new UsersRepository();
-    banksRepository = new BanksRepository();
-    accountsRepository = new AccountsRepository();
-  }
+  constructor(
+    @inject('UsersRepository')
+    private usersRepository: IUsersRepository,
+    @inject('BanksRepository')
+    private banksRepository: IBanksRepository,
+    @inject('AccountsRepository')
+    private accountsRepository: IAccountsRepository
+  ) {}
 
   async execute({ user_id, bank_id }: IRequest): Promise<Account> {
-    const isUserIdValid = await usersRepository.findById(user_id);
-    const isBankIdValid = await banksRepository.findById(bank_id);
-    const userHasAccount = await accountsRepository.findByUserId(user_id);
+    const isUserIdValid = await this.usersRepository.findById(user_id);
+    const isBankIdValid = await this.banksRepository.findById(bank_id);
+    const userHasAccount = await this.accountsRepository.findByUserId(user_id);
 
     if (!isUserIdValid) {
       throw new AppError('No user found for given user id.', 404);
@@ -38,7 +36,7 @@ class CreateAccountService {
 
     const initialBalance = 0;
 
-    const account = await accountsRepository.create({
+    const account = await this.accountsRepository.create({
       user_id,
       bank_id,
       balance: initialBalance,
