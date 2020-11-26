@@ -16,7 +16,8 @@ A simple bank api made with NodeJS using Typescript, Docker and Redis for rate l
 
 ## How to run tests
 
-- Run `docker exec -ti bank-api sh -c "yarn test"`
+- If you have yarn installed, just run `yarn test`
+- If you don't have yarn installed, run `docker exec -ti bank-api sh -c "yarn test"`
 
 ## Routes
 
